@@ -87,7 +87,7 @@ CurrentValue[$FrontEnd, InputAliases] =
   "qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
 	"QuantityUnit", Tooltip -> "Unit Template", 
 	DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(UnitFullName[s])~~"\""},
+	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(UnitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
 		If[KnownUnitQ@@MakeExpression@unit,
 		 RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
 		 RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
