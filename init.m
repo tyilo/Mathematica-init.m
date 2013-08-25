@@ -65,32 +65,37 @@ ManToGif[man_, name_String, step_Integer] :=
   ]
 
 (* Deca is intentionally left out as only one character prefixes are supported *)
-SIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
-UnitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"->"degreesCelsius","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
+$SIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
+$UnitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"->"degreesCelsius","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
 
-FirstDropWhile[list_,cond_]:=(l=LengthWhile[list,cond];
-If[l==Length[list],None,list[[l+1]]])
-StringCapitalize[str_]:=ToUpperCase@Characters[str][[1]]<>StringDrop[str,1]
-ReplaceUnit[str_]:=str/.UnitAbbreviations
-ReplaceSIPrefix[str_]:=(Characters[str][[1]]/.SIPrefixes)<>StringDrop[str,1]
-trans={Identity,StringCapitalize,Composition[StringCapitalize,ReplaceUnit],ReplaceSIPrefix,
-(ReplaceSIPrefix@Characters[#][[1]])<>ReplaceUnit[StringDrop[#,1]]&
-};
+FirstDropWhile[list_, cond_] := (
+	l = LengthWhile[list,cond];
+	If[l == Length[list],
+		None,
+		list[[l+1]]
+	])
+StringCapitalize[str_] := ToUpperCase @ Characters[str][[1]] <> StringDrop[str, 1]
+ReplaceUnit[str_] := str /. $UnitAbbreviations
+ReplaceSIPrefix[str_] := (Characters[str][[1]] /. $SIPrefixes) <> StringDrop[str, 1]
 
 UnitFullName[str_]:=(
-	candidates=Flatten[{#,#<>"s"}&/@Through[trans[str]]];
-	FirstDropWhile[candidates,!KnownUnitQ@#&]
+	transformations = {Identity, StringCapitalize,
+		Composition[StringCapitalize,ReplaceUnit], ReplaceSIPrefix,
+		(ReplaceSIPrefix@Characters[#][[1]]) <> ReplaceUnit[StringDrop[#,1]]&
+	};
+	candidates = Flatten[{#, # <> "s"}& /@ Through[transformations[str]]];
+	FirstDropWhile[candidates, !KnownUnitQ@# &]
 )
 
 CurrentValue[$FrontEnd, InputAliases] = 
- Append[DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu" -> _],
-  "qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
+	Append[DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu" -> _],
+	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
 	"QuantityUnit", Tooltip -> "Unit Template", 
 	DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
 	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(UnitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
 		If[KnownUnitQ@@MakeExpression@unit,
-		 RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
-		 RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
+			RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
+			RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
 		]] &)]]
 
 SolveFunctionCoordinates[coordinates_] := (length = Length[coordinates];
