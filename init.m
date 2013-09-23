@@ -1,7 +1,39 @@
 (* ::Package:: *)
+(* Timestamp: 2013-09-23 23:51 *)
 
 (** User Mathematica initialization file **)
 
+autoUpdate = False;
+
+If[autoUpdate,
+	initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
+	current = StringJoin@ReadList[f = OpenRead@initPath, Character];
+	Close@f;
+	newest = Quiet@URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
+	
+	If[newest == $Failed || StringSplit[newest, "\n"][[1]] != "(* ::Package:: *)",
+		Return[];
+	];
+	
+	getTimestamp[str_] := (
+		m = StringCases[str, StartOfLine ~~ "(* Timestamp: " ~~ Shortest@x__ ~~ " *)" ~~ EndOfLine -> x];
+		DateList@m[[1]]
+	);
+	
+	If[DateDifference[getTimestamp@current, getTimestamp@newest] <= 0,
+		Return[];
+	];
+	
+	If[StringTrim@current != StringTrim@newest,
+		WriteString[f = OpenWrite@initPath, newest];
+		Close@f;
+		
+		CreateDialog[{
+			"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes.",
+			DefaultButton[]
+		}];
+	];
+];
 
 Begin["System`"];
 SinDeg[d_] := Sin[d * Degree];
