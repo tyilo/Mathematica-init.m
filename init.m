@@ -198,9 +198,58 @@ Module[{steps = {}, stack = {}, pre, post, show, default = False},
 		Column@{Opener@Dynamic@default, 
 		Dynamic@Pane[First@steps, ImageSize -> 10000]}];
 
+Format[d[f_, x_], TraditionalForm] := DisplayForm[RowBox[{FractionBox["\[DifferentialD]",
+                                                  RowBox[{"\[DifferentialD]", x}]], f}]];
 
 Notation`AutoLoadNotationPalette = False;
 Needs["Notation`"];
 Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
+SpecificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
+                 d[(a_)^(x_), x_] :> D[a^x, x] /; FreeQ[a, x]};
+
+ConstantRule = d[c_, x_] :> 0 /; FreeQ[c, x];
+
+LinearityRule = {d[f_ + g_, x_] :> d[f, x] + d[g, x],
+                 d[c_ f_, x_] :> c d[f, x] /; FreeQ[c, x]};
+
+PowerRule = {d[x_, x_] :> 1, d[(x_)^(a_), x_] :> a*x^(a - 1) /; FreeQ[a, x]};
+
+ProductRule = d[f_ g_, x_] :> d[f, x] g + f d[g, x];
+
+QuotientRule = d[(f_)/(g_), x_] :> (d[f, x]*g - f*d[g, x])/g^2;
+
+InverseFunctionRule := d[InverseFunction[f_][x_], x_] :>
+                      1/Derivative[1][f][InverseFunction[f][x]];
+
+ChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
+             d[(a_)^(f_), x_] :> Log[a]*a^f*d[f, x] /; FreeQ[a, x],
+             d[(f_)[g_], x_] :> (D[f[x], x] /. x -> g)*d[g, x],
+             d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};
+
+$RuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule",
+              "Product Rule", "Quotient Rule", "Inverse Function Rule", "Chain Rule"};
+
+displayStart[expr_] := CellPrint[
+  Cell[BoxData[MakeBoxes[HoldForm[expr], TraditionalForm]], "Output", 
+   Evaluatable -> False, CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+   CellFrame -> False, CellEditDuplicate -> False]];
+
+displayDerivative[expr_, k_Integer] := CellPrint[
+  Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], $RuleNames[[k]], 
+     LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
+   CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+   CellFrame -> False, CellEditDuplicate -> False]];
+
+WalkD[f_, x_] := Module[{derivative, oldderivative, k}, 
+        derivative = d[f, x]; displayStart[derivative];
+        While[! FreeQ[derivative, d],
+            oldderivative = derivative; k = 0;
+            While[oldderivative == derivative,
+                      k++;
+                      derivative = derivative /. 
+                              ToExpression[StringReplace[$RuleNames[[k]], " " -> ""]]];
+            displayDerivative[derivative, k]];
+        D[f, x]];
 
 End[];
