@@ -74,12 +74,13 @@ MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
 
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
 
-PlotIntercept[f1_, f2_, o_, options_] := (
-	solution = Solve[y == f1 && y == f2, {x, y}]
-	Show[ListPlot[Transpose[{x /. solution, y /. solution}], PlotStyle -> {Red, PointSize[0.0125]}], Plot[{f1, f2}, o], options]
+PlotIntersect[f1_, f2_, o_, options_] := (
+	x = o[[1]];
+	solution = Solve[y == f1 && y == f2, {x, y}];
+	Show[Plot[{f1, f2}, o], ListPlot[Transpose[{x /. solution, y /. solution}], PlotStyle -> {Red, PointSize[0.0125]}], options]
 );
 	
-PlotIntercept[f1_, f2_, o_] := PlotIntercept[f1, f2, o, {}];
+PlotIntersect[f1_, f2_, o_] := PlotIntersect[f1, f2, o, {}];
 
 PlotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 	Plot[f[x], {x, from - margin, to + margin}, AxesOrigin -> {0, 0}, Epilog -> {
