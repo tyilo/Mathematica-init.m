@@ -3,15 +3,16 @@
 
 (** User Mathematica initialization file **)
 
-autoUpdate = False;
 
-If[autoUpdate,
+updateInitFile::networkError = "Failed to retrieve the latest init.m version from github."
+updateInitFile[] := (
 	initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 	current = StringJoin@ReadList[f = OpenRead@initPath, Character];
 	Close@f;
-	newest = Quiet@URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
+	newest = URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
 	
 	If[newest == $Failed || StringSplit[newest, "\n"][[1]] != "(* ::Package:: *)",
+		Message[updateInitFile::networkError];
 		Return[];
 	];
 	
@@ -21,19 +22,14 @@ If[autoUpdate,
 	);
 	
 	If[DateDifference[getTimestamp@current, getTimestamp@newest] <= 0,
-		Return[];
+		Return["Your init.m is already at the latest version."];
 	];
 	
-	If[StringTrim@current != StringTrim@newest,
-		WriteString[f = OpenWrite@initPath, newest];
-		Close@f;
-		
-		CreateDialog[{
-			"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes.",
-			DefaultButton[]
-		}];
-	];
-];
+	WriteString[f = OpenWrite@initPath, newest];
+	Close@f;
+	
+	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
+);
 
 Begin["System`"];
 SinDeg[d_] := Sin[d * Degree];
