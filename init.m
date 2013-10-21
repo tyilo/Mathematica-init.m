@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2013-09-23 23:51 *)
+(* Timestamp: 2013-10-22 00:00 *)
 
 (** User Mathematica initialization file **)
 
