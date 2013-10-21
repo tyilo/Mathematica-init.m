@@ -87,8 +87,9 @@ PlotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 		{Black, Line[{{from, 0}, {from, f[from]}}]},
 		{Black, Line[{{to, 0}, {to, f[to]}}]}
 	}],
-	Plot[f[x], {x, from, to}, Filling -> 0]
+	Plot[f[x], {x, from, to}, Filling -> 0, FillingStyle -> {LightRed, LightGreen}]
 };
+PlotDefiniteIntegral[f_, from_, to_] := PlotDefiniteIntegral[f, from, to, 0];
 
 ChemicalTable[formula_] := Module[{chemicals, properties},
 	chemicals = Check[ChemicalData[formula, "StandardName"], Break[]];
