@@ -20,6 +20,9 @@ updateInitFile[] := (
 		Return[];
 	];
 	
+	(* URLFetch truncates the last newline *)
+	newest = newest <> "\n";
+	
 	getTimestamp[str_] := (
 		m = StringCases[str, StartOfLine ~~ "(* Timestamp: " ~~ Shortest@x__ ~~ " *)" ~~ EndOfLine -> x];
 		DateList@m[[1]]
