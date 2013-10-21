@@ -35,9 +35,11 @@ updateInitFile[] := (
 	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
 );
 
+(* Make it possible to work with subscripted and overscripted variables *)
 Notation`AutoLoadNotationPalette = False;
 Needs["Notation`"];
 Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
+Symbolize[ParsedBoxWrapper[OverscriptBox["_","_"]]];
 
 SinDeg[d_] := Sin[d * Degree];
 CosDeg[d_] := Cos[d * Degree];
