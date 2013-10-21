@@ -94,7 +94,7 @@ PlotDefiniteIntegral[f_, from_, to_] := PlotDefiniteIntegral[f, from, to, 0];
 ChemicalTable[formula_] := Module[{chemicals, properties},
 	chemicals = Check[ChemicalData[formula, "StandardName"], Break[]];
 	chemicals = If[Length[chemicals] == 0, {chemicals}, chemicals];
-	properties = {"StandardName", "SMILES", "StructureDiagram"};
+	properties = {"StandardName", "MolecularFormulaDisplay", "StructureDiagram"};
 	OpenerView[{formula,
 		Grid[
 			Table[
