@@ -171,6 +171,21 @@ SolvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	];
 	Solve[equations, variables][[1]]
 );
+
+removeSubscript[s_String] :=
+	StringReplace[s,
+		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
+	]
+
+MolecularWeight[s_String] :=
+	ToExpression @ StringReplace[
+		StringReplace[
+			StringReplace[removeSubscript @ s,
+				x:RegularExpression["[A-Z][a-z]*"] :>
+				"ElementData[\"" <> x <> "\",\"AtomicWeight\"]+"
+			],
+			x:DigitCharacter .. :> "*" <> x <> "+"],
+		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}]
  
 SetAttributes[traceViewCompact, {HoldAllComplete}];
 traceViewCompact[expr_] :=
