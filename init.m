@@ -153,7 +153,7 @@ CurrentValue[$FrontEnd, InputAliases] =
 			RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
 		]] &)]];
 
-SolveFunctionCoordinates[coordinates_] := (length = Length[coordinates];
+SolvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	equations = {};
 	variables = {};
 	For[i = 1,
@@ -169,7 +169,7 @@ SolveFunctionCoordinates[coordinates_] := (length = Length[coordinates];
 		];
 		equations = Append[equations, coordinates[[i]][[2]] == rightHand]
 	];
-	Solve[equations, variables]
+	Solve[equations, variables][[1]]
 );
  
 SetAttributes[traceViewCompact, {HoldAllComplete}];
