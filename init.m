@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2013-10-22 00:15 *)
+(* Timestamp: 2013-10-22 00:22 *)
 
 (** User Mathematica initialization file **)
 
@@ -99,8 +99,23 @@ PlotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 };
 PlotDefiniteIntegral[f_, from_, to_] := PlotDefiniteIntegral[f, from, to, 0];
 
+removeSubscript[s_String] :=
+	StringReplace[s,
+		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
+	]
+
+MolecularWeight[s_String] :=
+	ToExpression @ StringReplace[
+		StringReplace[
+			StringReplace[removeSubscript @ s,
+				x:RegularExpression["[A-Z][a-z]*"] :>
+				"ElementData[\"" <> x <> "\",\"AtomicWeight\"]+"
+			],
+			x:DigitCharacter .. :> "*" <> x <> "+"],
+		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}]
+
 ChemicalTable[formula_] := Module[{chemicals, properties},
-	chemicals = Check[ChemicalData[formula, "StandardName"], Break[]];
+	chemicals = Check[ChemicalData[removeSubscript @ formula, "StandardName"], Break[]];
 	chemicals = If[Length[chemicals] == 0, {chemicals}, chemicals];
 	properties = {"StandardName", "MolecularFormulaDisplay", "StructureDiagram"};
 	OpenerView[{formula,
@@ -169,21 +184,6 @@ SolvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	];
 	Solve[equations, variables][[1]]
 );
-
-removeSubscript[s_String] :=
-	StringReplace[s,
-		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
-	]
-
-MolecularWeight[s_String] :=
-	ToExpression @ StringReplace[
-		StringReplace[
-			StringReplace[removeSubscript @ s,
-				x:RegularExpression["[A-Z][a-z]*"] :>
-				"ElementData[\"" <> x <> "\",\"AtomicWeight\"]+"
-			],
-			x:DigitCharacter .. :> "*" <> x <> "+"],
-		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}]
 
 (* Borrowed definitions *)
 
