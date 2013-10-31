@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2013-10-22 00:22 *)
+(* Timestamp: 2013-10-31 02:07 *)
 
 (** User Mathematica initialization file **)
 
@@ -98,6 +98,16 @@ PlotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 	Plot[f[x], {x, from, to}, Filling -> 0, FillingStyle -> {LightRed, LightGreen}]
 };
 PlotDefiniteIntegral[f_, from_, to_] := PlotDefiniteIntegral[f, from, to, 0];
+
+FitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R},
+	fit = NonlinearModelFit[data, expr, pars, vars];
+	col1 = data[[All, 1]];
+	
+	Show @ {
+		ListPlot[data, PlotLabel -> Column@{Normal[fit], R^2 == fit["RSquared"]}, AxesLabel -> {vars}],
+		Plot[fit[vars], {vars, Min[col1], Max[col1]}]
+	}
+];
 
 removeSubscript[s_String] :=
 	StringReplace[s,
