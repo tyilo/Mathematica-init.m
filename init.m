@@ -76,24 +76,24 @@ MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
 
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
 
-PlotIntersect[f1_, f2_, o_, options_] := (
+plotIntersect[f1_, f2_, o_, options_] := (
 	x = o[[1]];
 	solution = Solve[y == f1 && y == f2, {x, y}];
 	Show[Plot[{f1, f2}, o], ListPlot[Transpose[{x /. solution, y /. solution}], PlotStyle -> {Red, PointSize[0.0125]}], options]
 );
 	
-PlotIntersect[f1_, f2_, o_] := PlotIntersect[f1, f2, o, {}];
+plotIntersect[f1_, f2_, o_] := plotIntersect[f1, f2, o, {}];
 
-PlotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
+plotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 	Plot[f[x], {x, from - margin, to + margin}, AxesOrigin -> {0, 0}, Epilog -> {
 		{Black, Line[{{from, 0}, {from, f[from]}}]},
 		{Black, Line[{{to, 0}, {to, f[to]}}]}
 	}],
 	Plot[f[x], {x, from, to}, Filling -> 0, FillingStyle -> {LightRed, LightGreen}]
 };
-PlotDefiniteIntegral[f_, from_, to_] := PlotDefiniteIntegral[f, from, to, 0];
+plotDefiniteIntegral[f_, from_, to_] := plotDefiniteIntegral[f, from, to, 0];
 
-FitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R},
+fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R},
 	fit = NonlinearModelFit[data, expr, pars, vars];
 	col1 = data[[All, 1]];
 	
@@ -108,7 +108,7 @@ removeSubscript[s_String] :=
 		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
 	]
 
-MolecularWeight[s_String] :=
+molecularWeight[s_String] :=
 	ToExpression @ StringReplace[
 		StringReplace[
 			StringReplace[removeSubscript @ s,
@@ -118,7 +118,7 @@ MolecularWeight[s_String] :=
 			x:DigitCharacter .. :> "*" <> x <> "+"],
 		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}]
 
-ChemicalTable[formula_] := Module[{chemicals, properties},
+chemicalTable[formula_] := Module[{chemicals, properties},
 	chemicals = Check[ChemicalData[removeSubscript @ formula, "StandardName"], Break[]];
 	chemicals = If[Length[chemicals] == 0, {chemicals}, chemicals];
 	properties = {"StandardName", "MolecularFormulaDisplay", "StructureDiagram"};
@@ -136,27 +136,27 @@ ChemicalTable[formula_] := Module[{chemicals, properties},
 ];
 
 (* Deca is intentionally left out as only one character prefixes are supported *)
-$SIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
-$UnitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"->"degreesCelsius","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
+$mySIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
+$unitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"->"degreesCelsius","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
 
-FirstDropWhile[list_, cond_] := (
+firstDropWhile[list_, cond_] := (
 	l = LengthWhile[list, cond];
 	If[l == Length[list],
 		Null,
 		list[[l+1]]
 	]
 );
-StringCapitalize[str_] := ToUpperCase @ Characters[str][[1]] <> StringDrop[str, 1];
-ReplaceUnit[str_] := str /. $UnitAbbreviations;
-ReplaceSIPrefix[str_] := (Characters[str][[1]] /. $SIPrefixes) <> StringDrop[str, 1];
+stringCapitalize[str_String] := ToUpperCase @ Characters[str][[1]] <> StringDrop[str, 1];
+replaceUnit[str_String] := str /. $unitAbbreviations;
+replaceSIPrefix[str_String] := (Characters[str][[1]] /. $mySIPrefixes) <> StringDrop[str, 1];
 
-UnitFullName[str_]:=(
-	transformations = {Identity, StringCapitalize,
-		Composition[StringCapitalize,ReplaceUnit], ReplaceSIPrefix,
-		(ReplaceSIPrefix@Characters[#][[1]]) <> ReplaceUnit[StringDrop[#,1]]&
+unitFullName[str_String]:=(
+	transformations = {Identity, stringCapitalize,
+		Composition[stringCapitalize, replaceUnit], replaceSIPrefix,
+		(replaceSIPrefix@Characters[#][[1]]) <> replaceUnit[StringDrop[#,1]]&
 	};
 	candidates = Flatten[{#, # <> "s"}& /@ Through[transformations[str]]];
-	FirstDropWhile[candidates, !KnownUnitQ@# &]
+	firstDropWhile[candidates, !KnownUnitQ@# &]
 );
 
 CurrentValue[$FrontEnd, InputAliases] = 
@@ -164,13 +164,13 @@ CurrentValue[$FrontEnd, InputAliases] =
 	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
 	"QuantityUnit", Tooltip -> "Unit Template", 
 	DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(UnitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
 		If[KnownUnitQ@@MakeExpression@unit,
 			RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
 			RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
 		]] &)]];
 
-SolvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
+solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	equations = {};
 	variables = {};
 	For[i = 1,
@@ -191,7 +191,7 @@ SolvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 
 (* Borrowed definitions *)
 
-ManToGif[man_, name_String, step_Integer] :=
+manToGif[man_, name_String, step_Integer] :=
 Export[name <> ".gif",
 	Import[
 		Export[name <> Which[$OperatingSystem == "MacOSX", ".mov", $OperatingSystem == "Windows", ".avi"],
@@ -232,29 +232,29 @@ Module[{steps = {}, stack = {}, pre, post, show, default = False},
 Format[d[f_, x_], TraditionalForm] := DisplayForm[RowBox[{FractionBox["\[DifferentialD]",
                                                   RowBox[{"\[DifferentialD]", x}]], f}]];
 
-SpecificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
+specificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
                  d[(a_)^(x_), x_] :> D[a^x, x] /; FreeQ[a, x]};
 
-ConstantRule = d[c_, x_] :> 0 /; FreeQ[c, x];
+constantRule = d[c_, x_] :> 0 /; FreeQ[c, x];
 
-LinearityRule = {d[f_ + g_, x_] :> d[f, x] + d[g, x],
+linearityRule = {d[f_ + g_, x_] :> d[f, x] + d[g, x],
                  d[c_ f_, x_] :> c d[f, x] /; FreeQ[c, x]};
 
-PowerRule = {d[x_, x_] :> 1, d[(x_)^(a_), x_] :> a*x^(a - 1) /; FreeQ[a, x]};
+powerRule = {d[x_, x_] :> 1, d[(x_)^(a_), x_] :> a*x^(a - 1) /; FreeQ[a, x]};
 
-ProductRule = d[f_ g_, x_] :> d[f, x] g + f d[g, x];
+productRule = d[f_ g_, x_] :> d[f, x] g + f d[g, x];
 
-QuotientRule = d[(f_)/(g_), x_] :> (d[f, x]*g - f*d[g, x])/g^2;
+quotientRule = d[(f_)/(g_), x_] :> (d[f, x]*g - f*d[g, x])/g^2;
 
-InverseFunctionRule := d[InverseFunction[f_][x_], x_] :>
+inverseFunctionRule := d[InverseFunction[f_][x_], x_] :>
                       1/Derivative[1][f][InverseFunction[f][x]];
 
-ChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
+chainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
              d[(a_)^(f_), x_] :> Log[a]*a^f*d[f, x] /; FreeQ[a, x],
              d[(f_)[g_], x_] :> (D[f[x], x] /. x -> g)*d[g, x],
              d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};
 
-$RuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule",
+$dRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule",
               "Product Rule", "Quotient Rule", "Inverse Function Rule", "Chain Rule"};
 
 displayStart[expr_] := CellPrint[
@@ -264,19 +264,19 @@ displayStart[expr_] := CellPrint[
 
 displayDerivative[expr_, k_Integer] := CellPrint[
   Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
-       MakeBoxes[HoldForm[expr], TraditionalForm]}], $RuleNames[[k]], 
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], $dRuleNames[[k]], 
      LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
    CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
    CellFrame -> False, CellEditDuplicate -> False]];
 
-WalkD[f_, x_] := Module[{derivative, oldderivative, k}, 
+walkD[f_, x_] := Module[{derivative, oldderivative, k}, 
         derivative = d[f, x]; displayStart[derivative];
         While[! FreeQ[derivative, d],
             oldderivative = derivative; k = 0;
             While[oldderivative == derivative,
                       k++;
                       derivative = derivative /. 
-                              ToExpression[StringReplace[$RuleNames[[k]], " " -> ""]]];
+                              ToExpression[StringReplace[$dRuleNames[[k]], {" " -> "", StartOfString ~~ c:_ -> ToLowerCase[c]}]]];
             displayDerivative[derivative, k]];
         D[f, x]];
 
