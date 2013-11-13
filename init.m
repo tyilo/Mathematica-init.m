@@ -6,6 +6,12 @@
 (* Needed to make function appear in the auto-complete prompt *)
 Begin["System`"];
 
+(* Disable WolframAlpha *)
+Unprotect[WolframAlpha]
+ClearAll[WolframAlpha]
+WolframAlpha[x__] := Null
+Protect[WolframAlpha]
+
 (* My definitions *)
 
 updateInitFile::networkError = "Failed to retrieve the latest init.m version from github."
