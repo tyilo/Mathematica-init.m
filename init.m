@@ -143,7 +143,8 @@ chemicalTable[formula_] := Module[{chemicals, properties},
 
 (* Deca is intentionally left out as only one character prefixes are supported *)
 $mySIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
-$unitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"->"degreesCelsius","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
+$unitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"|"℃"->"degreesCelsius","\[Degree]F"|"℉"->"degreesFahrenheit","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","M"->"molar","N"->"newtons","Pa"->"pascals","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
+$constantAbbreviations={"\[CurlyEpsilon]0"|"\[Epsilon]0"->"electricConstant","\[Mu]0"->"magneticConstant","c"->"speedOfLight","e"->"elementaryCharge","G"->"gravitationalConstant","h"->"planckConstant","k"->"boltzmannConstant","me"->"electronMass","NA"->"avogadroConstant","R"->"molarGasConstant"};
 
 firstDropWhile[list_, cond_] := (
 	l = LengthWhile[list, cond];
@@ -153,17 +154,27 @@ firstDropWhile[list_, cond_] := (
 	]
 );
 stringCapitalize[str_String] := ToUpperCase @ Characters[str][[1]] <> StringDrop[str, 1];
-replaceUnit[str_String] := str /. $unitAbbreviations;
 replaceSIPrefix[str_String] := (Characters[str][[1]] /. $mySIPrefixes) <> StringDrop[str, 1];
 
-unitFullName[str_String]:=(
+fullName[str_String, rule_] := Module[{applyRule, transformations, candidates},
+	applyRule = (# /. rule)&;
 	transformations = {Identity, stringCapitalize,
-		Composition[stringCapitalize, replaceUnit], replaceSIPrefix,
-		(replaceSIPrefix@Characters[#][[1]]) <> replaceUnit[StringDrop[#,1]]&
+		Composition[stringCapitalize, applyRule], replaceSIPrefix,
+		(replaceSIPrefix@Characters[#][[1]]) <> applyRule[StringDrop[#,1]]&
 	};
 	candidates = Flatten[{#, # <> "s"}& /@ Through[transformations[str]]];
 	firstDropWhile[candidates, !KnownUnitQ@# &]
+];
+
+unitFullName[str_String] := fullName[str, $unitAbbreviations];
+knownUnitAbbreviationQ[str_String] := (
+	unitFullName[str] =!= Null
 );
+constantFullName[str_String] := fullName[str, $constantAbbreviations];
+knownConstantAbbreviationQ[str_String] := (
+	constantFullName[str] =!= Null
+);
+
 fullUnit[u_] := Module[{}, 
 	Hold @ Evaluate[u /. {s_String?LetterQ :> unitFullName[s], CenterDot -> Times}]
 ];
@@ -192,10 +203,23 @@ CurrentValue[$FrontEnd, InputAliases] =
 	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
 	"QuantityUnit", Tooltip -> "Unit Template", 
 	DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-	InterpretationFunction -> (With[{unit = #2 /. s_String?LetterQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+	InterpretationFunction -> (With[{unit = #2 /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+		(*Print[unit];*)
 		If[KnownUnitQ@@MakeExpression@unit,
 			RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
 			RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
+		]] &)]];
+
+CurrentValue[$FrontEnd, InputAliases] = 
+	Append[DeleteCases[CurrentValue[$FrontEnd, InputAliases], "const" -> _],
+	"const" -> TemplateBox[{"\[SelectionPlaceholder]"}, 
+	"Constant", Tooltip -> "Constant Template", 
+	DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
+	InterpretationFunction -> (With[{const = # /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
+		(*Print[const];*)
+		If[KnownUnitQ@@MakeExpression@const,
+			RowBox[{"Quantity", "[", 1, ",", const, "]"}],
+			RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
 		]] &)]];
 
 solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
