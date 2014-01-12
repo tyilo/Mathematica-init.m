@@ -99,8 +99,9 @@ plotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 };
 plotDefiniteIntegral[f_, from_, to_] := plotDefiniteIntegral[f, from, to, 0];
 
-fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R},
+fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R, params},
 	fit = NonlinearModelFit[data, expr, pars, vars];
+	params = fit["BestFitParameters"];
 	col1 = data[[All, 1]];
 	
 	Show @ {
