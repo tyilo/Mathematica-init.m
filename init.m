@@ -199,29 +199,32 @@ UnitConvert[n_, u_] := Block[{$inUnitConvert = True, fu},
 Protect[Quantity, UnitConvert];
 *)
 
-CurrentValue[$FrontEnd, InputAliases] = 
-	Append[DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu" -> _],
-	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
-	"QuantityUnit", Tooltip -> "Unit Template", 
-	DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-	InterpretationFunction -> (With[{unit = #2 /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
-		(*Print[unit];*)
-		If[KnownUnitQ@@MakeExpression@unit,
-			RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
-			RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
-		]] &)]];
+CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const" -> _];
 
-CurrentValue[$FrontEnd, InputAliases] = 
-	Append[DeleteCases[CurrentValue[$FrontEnd, InputAliases], "const" -> _],
+CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliases], {
+	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
+		"QuantityUnit", Tooltip -> "Unit Template", 
+		DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
+		InterpretationFunction -> (With[{unit = #2 /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+			(*Print[unit];*)
+			If[KnownUnitQ@@MakeExpression@unit,
+				RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
+				RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
+			]
+		] &)
+	],
 	"const" -> TemplateBox[{"\[SelectionPlaceholder]"}, 
-	"Constant", Tooltip -> "Constant Template", 
-	DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-	InterpretationFunction -> (With[{const = # /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
-		(*Print[const];*)
-		If[KnownUnitQ@@MakeExpression@const,
-			RowBox[{"Quantity", "[", 1, ",", const, "]"}],
-			RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
-		]] &)]];
+		"Constant", Tooltip -> "Constant Template", 
+		DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
+		InterpretationFunction -> (With[{const = # /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
+			(*Print[const];*)
+			If[KnownUnitQ@@MakeExpression@const,
+				RowBox[{"Quantity", "[", 1, ",", const, "]"}],
+				RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
+			]
+		] &)
+	]
+}];
 
 solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	equations = {};
