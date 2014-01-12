@@ -104,7 +104,7 @@ fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R},
 	col1 = data[[All, 1]];
 	
 	Show @ {
-		ListPlot[data, PlotLabel -> Column@{Normal[fit], R^2 == fit["RSquared"]}, AxesLabel -> {vars}],
+		ListPlot[data, PlotLabel -> Column@{Normal[fit], params, R^2 == fit["RSquared"]}, AxesLabel -> {vars}],
 		Plot[fit[vars], {vars, Min[col1], Max[col1]}]
 	}
 ];
