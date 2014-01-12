@@ -7,14 +7,14 @@
 Begin["System`"];
 
 (* Disable WolframAlpha *)
-Unprotect[WolframAlpha]
-ClearAll[WolframAlpha]
-WolframAlpha[x__] := Null
-Protect[WolframAlpha]
+Unprotect[WolframAlpha];
+ClearAll[WolframAlpha];
+WolframAlpha[x__] := Null;
+Protect[WolframAlpha];
 
 (* My definitions *)
 
-updateInitFile::networkError = "Failed to retrieve the latest init.m version from github."
+updateInitFile::networkError = "Failed to retrieve the latest init.m version from github.";
 updateInitFile[] := (
 	initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 	current = StringJoin@ReadList[f = OpenRead@initPath, Character];
@@ -113,7 +113,7 @@ fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R, params},
 removeSubscript[s_String] :=
 	StringReplace[s,
 		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
-	]
+	];
 
 molecularWeight[s_String] :=
 	ToExpression @ StringReplace[
@@ -123,7 +123,7 @@ molecularWeight[s_String] :=
 				"ElementData[\"" <> x <> "\",\"AtomicWeight\"]+"
 			],
 			x:DigitCharacter .. :> "*" <> x <> "+"],
-		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}]
+		{"+*" -> "*", "+" ~~ EndOfString -> "", "+)" -> ")"}];
 
 chemicalTable[formula_] := Module[{chemicals, properties},
 	chemicals = Check[ChemicalData[removeSubscript @ formula, "StandardName"], Break[]];
