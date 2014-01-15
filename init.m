@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-01-12 22:14 *)
+(* Timestamp: 2014-01-15 20:00 *)
 
 (** User Mathematica initialization file **)
 
@@ -81,6 +81,8 @@ MinusPlus[a_, {b1_, b2_}] := MinusPlus[{a, a}, {b1, b2}];
 MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
 
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
+
+allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
 
 plotIntersect[f1_, f2_, o_, options_] := (
 	x = o[[1]];
