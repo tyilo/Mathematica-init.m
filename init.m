@@ -44,6 +44,8 @@ updateInitFile[] := (
 	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
 );
 
+fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
+
 SinDeg[d_] := Sin[d * Degree];
 CosDeg[d_] := Cos[d * Degree];
 TanDeg[d_] := Tan[d * Degree];
