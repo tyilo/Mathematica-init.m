@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-01-15 20:00 *)
+(* Timestamp: 2014-02-17 01:10 *)
 
 (** User Mathematica initialization file **)
 
@@ -103,16 +103,39 @@ plotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
 };
 plotDefiniteIntegral[f_, from_, to_] := plotDefiniteIntegral[f, from, to, 0];
 
-fitPlot[data_, expr_, pars_, vars_] := Block[{fit, fitted, col1, R, params},
+fitPlotOptions = {showFunction, showParams, showRSquared};
+Options[fitPlot] = Table[x -> True, {x, fitPlotOptions}] ~Join~ Options[Plot];
+
+fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, params, col1, plotRange, xmin, xmax, labelOptions, labels, R, otherOptions, fitted},
+	Assert[Length@Dimensions[data] >= 2 && Dimensions[data][[2]] == 2];
+	Assert[Head@vars == Symbol];
+	
 	fit = NonlinearModelFit[data, expr, pars, vars];
 	params = fit["BestFitParameters"];
-	col1 = data[[All, 1]];
-	
-	Show @ {
-		ListPlot[data, PlotLabel -> Column@{Normal[fit], params, R^2 == fit["RSquared"]}, AxesLabel -> {vars}],
-		Plot[fit[vars], {vars, Min[col1], Max[col1]}]
-	}
+	col1 = data[[All,1]];
+	plotRange = OptionValue[PlotRange];
+	{xmin, xmax} = If[Head@plotRange == List && Length@plotRange == 2 && Length@plotRange[[1]] == 2,
+		plotRange[[1]],
+		{Automatic, Automatic}
+	];
+	xmin = xmin /. Automatic -> Min[col1];
+	xmax = xmax /. Automatic -> Max[col1];
+	labelOptions = fitPlotOptions;
+	labels = Flatten@Position[OptionValue[#] & /@ labelOptions, True] /. {
+		1 -> Normal[fit],
+		2 -> params,
+		3 -> R^2 == fit["RSquared"]
+	};
+	otherOptions = Sequence @@ DeleteCases[{options}, Alternatives @@ fitPlotOptions -> _];
+	Plot[fit[vars], {vars, xmin, xmax},
+		PlotLabel -> Column@labels,
+		AxesLabel -> {vars},
+		Epilog -> {PointSize[Medium], Point[data]},
+		Evaluate @ otherOptions
+	]
 ];
+
+fitPlot[data_, expr_, pars_, vars_] := fitPlot[data, expr, pars, vars, Sequence@{}];
 
 removeSubscript[s_String] :=
 	StringReplace[s,
