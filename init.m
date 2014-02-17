@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-02-17 01:10 *)
+(* Timestamp: 2014-02-17 10:10 *)
 
 (** User Mathematica initialization file **)
 
@@ -141,6 +141,7 @@ removeSubscript[s_String] :=
 	StringReplace[s,
 		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
 	];
+removeSubscript[x_] := x;
 
 molecularWeight[s_String] :=
 	ToExpression @ StringReplace[
@@ -168,6 +169,38 @@ chemicalTable[formula_] := Module[{chemicals, properties},
 		Frame -> All]
 	}, True]
 ];
+
+thermodynamicData = {{"Ag(s)", 0, 42.55, 0}, {"Ag+(aq)", 105.79, 73.45, 77.16}, 
+ {"AgCl(s)", -127.01, 96.25, -109.86}, {"AgI(s)", -61.87, 115.83, -66.22}, 
+ {"Ba(OH)2\[CenterDot]H2O(s)", -3342.2, 427, -2792.2}, {"BaCl2\[CenterDot]2H2O(s)", -1456.9, 202., 
+  -1293.2}, {"C(s,grafit)", 0, 5.74, 0}, {"C(s,diamant)", 1.895, 2.377, 2.832}, 
+ {"CH4(g)", -74.6, 186.3, -50.5}, {"C2H4(g)", 52.3, 219.3, 68.27}, 
+ {"C7H16(l)", -224.2, 326.1, 1.89}, {"CH3OH(l)", -239.2, 126.8, -166.6}, 
+ {"CH3CH2OH(l)", -277.6, 160.7, -174.8}, {"CO(g)", -110.53, 197.66, -137.25}, 
+ {"CO2(g)", -393.51, 213.785, -394.4}, {"CaCO3(s)", -1206.92, 92.9, -1128.84}, 
+ {"CaO(s)", -634.92, 38.1, -603.3}, {"Cl-(aq)", -167.08, 56.6, -131.2}, 
+ {"CrO4--(aq)", -881.15, 50.2, -727.8}, {"H2(g)", 0, 130.68, 0}, 
+ {"H+(aq)", 0, 0, 0}, {"H3O+(aq)", -285.83, 69.95, -237.13}, 
+ {"H2O(l)", -285.83, 69.95, -237.13}, {"H2O(g)", -241.8, 188.8, -228.6}, 
+ {"HCl(g)", -92.3, 186.9, -95.3}, {"HI(g)", 25.94, 206.44, 1.32}, 
+ {"I2(s)", 0, 116.14, 0}, {"I-(aq)", -56.78, 106.45, -51.6}, 
+ {"N2(g)", 0, 191.61, 0}, {"NH3(g)", -45.5, 192.8, -16.4}, 
+ {"NH4-(aq)", -132.4, 113.4, -79.3}, {"NH4Cl(s)", -314.6, 94.6, -202.9}, 
+ {"NH4NO3(s)", -365.3, 151.1, -183.9}, {"NO(g)", 91.2, 210.8, 87.6}, {"NO2(g)", 33.1, 240.1, 51.3},
+ {"N2O4(g)", 11.4, 304.3, 99.8}, {"NO3-(aq)", -207, 146.4, -111.3}, 
+ {"Na(s)", 0, 51.3, 0}, {"Na+(aq)", -240.34, 58.45, -261.9}, 
+ {"NaCl(s)", -411.2, 72.1, -384.1}, {"O2(g)", 0, 205.15, 0}, 
+ {"OH-(aq)", -230.01, -10.9, -157.2}, {"SO2(g)", -296.81, 248.23, -300.1}, 
+ {"SO3(g)", -395.72, 256.83, -371.03}};
+
+deltaThermo[reactants_->products_,i_,rule_]:=(products/.rule)-(reactants/.rule);
+deltaThermo[reactants_->products_,i_]:=Block[{rule=Rule@@@thermodynamicData[[All,{1,i+1}]]},(products/.rule)-(reactants/.rule)];
+deltaH[r:(reactants_->products_)]:=deltaThermo[r,1];
+deltaS[r:(reactants_->products_)]:=deltaThermo[r,2];
+deltaG[r:(reactants_->products_)]:=deltaThermo[r,3];
+deltaH[r:(reactants_->products_), otherRule_]:=deltaThermo[r,1,otherRule];
+deltaS[r:(reactants_->products_), otherRule_]:=deltaThermo[r,2,otherRule];
+deltaG[r:(reactants_->products_), otherRule_]:=deltaThermo[r,3,otherRule];
 
 (* Deca is intentionally left out as only one character prefixes are supported *)
 $mySIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
