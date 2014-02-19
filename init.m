@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-02-17 10:10 *)
+(* Timestamp: 2014-02-19 14:20 *)
 
 (** User Mathematica initialization file **)
 
@@ -193,14 +193,18 @@ thermodynamicData = {{"Ag(s)", 0, 42.55, 0}, {"Ag+(aq)", 105.79, 73.45, 77.16},
  {"OH-(aq)", -230.01, -10.9, -157.2}, {"SO2(g)", -296.81, 248.23, -300.1}, 
  {"SO3(g)", -395.72, 256.83, -371.03}};
 
-deltaThermo[reactants_->products_,i_,rule_]:=(products/.rule)-(reactants/.rule);
-deltaThermo[reactants_->products_,i_]:=Block[{rule=Rule@@@thermodynamicData[[All,{1,i+1}]]},(products/.rule)-(reactants/.rule)];
-deltaH[r:(reactants_->products_)]:=deltaThermo[r,1];
-deltaS[r:(reactants_->products_)]:=deltaThermo[r,2];
-deltaG[r:(reactants_->products_)]:=deltaThermo[r,3];
-deltaH[r:(reactants_->products_), otherRule_]:=deltaThermo[r,1,otherRule];
-deltaS[r:(reactants_->products_), otherRule_]:=deltaThermo[r,2,otherRule];
-deltaG[r:(reactants_->products_), otherRule_]:=deltaThermo[r,3,otherRule];
+deltaThermo[reactants_ -> products_, i_Integer, rule_List] := 
+  Quantity[(products /. rule) - (reactants /. rule), 
+   Evaluate@
+    If[i == 2, "Joules"/("Moles"*"Kelvins"), "Kilojoules"/"Moles"]];
+deltaThermo[r_Rule, i_Integer] := 
+  deltaThermo[r, i, Rule @@@ thermodynamicData[[All, {1, i + 1}]]];
+deltaH[r_Rule] := deltaThermo[r, 1];
+deltaS[r_Rule] := deltaThermo[r, 2];
+deltaG[r_Rule] := deltaThermo[r, 3];
+deltaH[r_Rule, otherRule_] := deltaThermo[r, 1, otherRule];
+deltaS[r_Rule, otherRule_] := deltaThermo[r, 2, otherRule];
+deltaG[r_Rule, otherRule_] := deltaThermo[r, 3, otherRule];
 
 (* Deca is intentionally left out as only one character prefixes are supported *)
 $mySIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"->"Giga","M"->"Mega","k"->"Kilo","h"->"Hecto","d"->"Deci","c"->"Centi","m"->"Milli","\[Mu]"|"\[Micro]"->"Micro","n"->"Nano","p"->"Pico","f"->"Femto","a"->"Atto","z"->"Zepto","y"->"Yocto"};
