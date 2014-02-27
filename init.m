@@ -137,6 +137,17 @@ fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, par
 
 fitPlot[data_, expr_, pars_, vars_] := fitPlot[data, expr, pars, vars, Sequence@{}];
 
+plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b}, 
+	Manipulate[
+		GraphicsRow[{
+			Plot3D[eq, Evaluate@param1, Evaluate@param2, Mesh -> {{a}, {b}}],
+			Plot[eq /. param2[[1]] -> b, Evaluate@param1, AxesLabel -> {"x", "z"}],
+			Plot[eq /. param1[[1]] -> a, Evaluate@param2, AxesLabel -> {"y", "z"}]
+		}, ImageSize -> Full],
+	{{a, Mean[param1[[2 ;; 3]]], "x"}, param1[[2]], param1[[3]]},
+	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]	
+];
+
 removeSubscript[s_String] :=
 	StringReplace[s,
 		"\!\(\*SubscriptBox[\(" ~~ Shortest[x__] ~~ "\), \(" ~~ Shortest[y__] ~~ "\)]\)" :> x <> y
