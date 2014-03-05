@@ -129,7 +129,6 @@ fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, par
 	otherOptions = Sequence @@ DeleteCases[{options}, Alternatives @@ fitPlotOptions -> _];
 	Plot[fit[vars], {vars, xmin, xmax},
 		PlotLabel -> Column@labels,
-		AxesLabel -> {vars},
 		Epilog -> {PointSize[Medium], Point[data]},
 		Evaluate @ otherOptions
 	]
