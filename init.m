@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-02-27 15:10 *)
+(* Timestamp: 2014-03-10 12:22 *)
 
 (** User Mathematica initialization file **)
 
@@ -145,6 +145,12 @@ plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 		}, ImageSize -> Full],
 	{{a, Mean[param1[[2 ;; 3]]], "x"}, param1[[2]], param1[[3]]},
 	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]	
+];
+
+lineElementPlot[f_, x_, y_, options:OptionsPattern[VectorPlot]] := VectorPlot[
+	Normalize@{1, f}, x, y, options,
+	VectorStyle -> Arrowheads[0],
+	VectorScale -> 0.04
 ];
 
 removeSubscript[s_String] :=
