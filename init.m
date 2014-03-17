@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-10 12:22 *)
+(* Timestamp: 2014-03-17 11:14 *)
 
 (** User Mathematica initialization file **)
 
@@ -94,14 +94,15 @@ plotIntersect[f1_, f2_, o_, options_] := (
 	
 plotIntersect[f1_, f2_, o_] := plotIntersect[f1, f2, o, {}];
 
-plotDefiniteIntegral[f_, from_, to_, margin_] := Show@{
-	Plot[f[x], {x, from - margin, to + margin}, AxesOrigin -> {0, 0}, Epilog -> {
-		{Black, Line[{{from, 0}, {from, f[from]}}]},
-		{Black, Line[{{to, 0}, {to, f[to]}}]}
+plotDefiniteIntegral[expr_, {x_, xmin_, xmax_}, margin_] := Show@{
+	Plot[expr, {x, xmin - margin, xmax + margin}, AxesOrigin -> {0, 0}, Epilog -> {
+		{Black, Line[{{xmin, 0}, {xmin, expr /. x -> xmin}}]},
+		{Black, Line[{{xmax, 0}, {xmax, expr /. x -> xmax}}]}
 	}],
-	Plot[f[x], {x, from, to}, Filling -> 0, FillingStyle -> {LightRed, LightGreen}]
+	Plot[expr, {x, xmin, xmax}, Filling -> 0, FillingStyle -> {LightRed, LightGreen}]
 };
-plotDefiniteIntegral[f_, from_, to_] := plotDefiniteIntegral[f, from, to, 0];
+
+plotDefiniteIntegral[expr_, {x_, xmin_, xmax_}] := plotDefiniteIntegral[expr, {x, xmin, xmax}, (xmax - xmin) / 6];
 
 fitPlotOptions = {showFunction, showParams, showRSquared};
 Options[fitPlot] = Table[x -> True, {x, fitPlotOptions}] ~Join~ Options[Plot];
