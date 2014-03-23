@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-17 11:14 *)
+(* Timestamp: 2014-03-23 14:57 *)
 
 (** User Mathematica initialization file **)
 
@@ -136,6 +136,11 @@ fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, par
 ];
 
 fitPlot[data_, expr_, pars_, vars_] := fitPlot[data, expr, pars, vars, Sequence@{}];
+
+plotWithPoints[expr_, {x_, xmin_, xmax_}, xs_, options:OptionsPattern[Plot]] := Plot[expr, {x, xmin, xmax},
+	Epilog -> {Black, PointSize[Medium], Point@Table[{n, expr /. x -> n}, {n, xs}]},
+	options
+];
 
 plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b}, 
 	Manipulate[
