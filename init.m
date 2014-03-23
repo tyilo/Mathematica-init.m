@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-23 16:22 *)
+(* Timestamp: 2014-03-24 01:37 *)
 
 (** User Mathematica initialization file **)
 
@@ -374,24 +374,24 @@ Module[{steps = {}, stack = {}, pre, post, show, default = False},
 Format[d[f_, x_], TraditionalForm] := DisplayForm[RowBox[{FractionBox["\[DifferentialD]",
                                                   RowBox[{"\[DifferentialD]", x}]], f}]];
 
-specificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
+dSpecificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
                  d[(a_)^(x_), x_] :> D[a^x, x] /; FreeQ[a, x]};
 
-constantRule = d[c_, x_] :> 0 /; FreeQ[c, x];
+dConstantRule = d[c_, x_] :> 0 /; FreeQ[c, x];
 
-linearityRule = {d[f_ + g_, x_] :> d[f, x] + d[g, x],
+dLinearityRule = {d[f_ + g_, x_] :> d[f, x] + d[g, x],
                  d[c_ f_, x_] :> c d[f, x] /; FreeQ[c, x]};
 
-powerRule = {d[x_, x_] :> 1, d[(x_)^(a_), x_] :> a*x^(a - 1) /; FreeQ[a, x]};
+dPowerRule = {d[x_, x_] :> 1, d[(x_)^(a_), x_] :> a*x^(a - 1) /; FreeQ[a, x]};
 
-productRule = d[f_ g_, x_] :> d[f, x] g + f d[g, x];
+dProductRule = d[f_ g_, x_] :> d[f, x] g + f d[g, x];
 
-quotientRule = d[(f_)/(g_), x_] :> (d[f, x]*g - f*d[g, x])/g^2;
+dQuotientRule = d[(f_)/(g_), x_] :> (d[f, x]*g - f*d[g, x])/g^2;
 
-inverseFunctionRule := d[InverseFunction[f_][x_], x_] :>
+dInverseFunctionRule := d[InverseFunction[f_][x_], x_] :>
                       1/Derivative[1][f][InverseFunction[f][x]];
 
-chainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
+dChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
              d[(a_)^(f_), x_] :> Log[a]*a^f*d[f, x] /; FreeQ[a, x],
              d[(f_)[g_], x_] :> (D[f[x], x] /. x -> g)*d[g, x],
              d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};
@@ -418,9 +418,69 @@ walkD[f_, x_] := Module[{derivative, oldderivative, k},
             While[oldderivative == derivative,
                       k++;
                       derivative = derivative /. 
-                              ToExpression[StringReplace[$dRuleNames[[k]], {" " -> "", StartOfString ~~ c:_ -> ToLowerCase[c]}]]];
+                              ToExpression["d" <> StringReplace[$dRuleNames[[k]], " " -> ""]]];
             displayDerivative[derivative, k]];
         D[f, x]];
+
+
+Format[int[f_,x_],TraditionalForm]:= (
+	paren = MatchQ[f,Plus[_,__]];
+	boxes = RowBox[{f}];
+	If[paren,
+		boxes = RowBox[{"(", boxes, ")"}]
+	];
+	boxes = RowBox[{boxes, "\[DifferentialD]", x}];
+	boxes = RowBox[{"\[Integral]", boxes}];
+	DisplayForm[boxes]
+	(*DisplayForm[RowBox[{"\[Integral]", If[paren,"(",""] , RowBox[{f}], If[paren,")",""],"\[DifferentialD]",x}]]*)
+);
+
+intSpecificRules = {int[(f_)[x_], x_] :> Integrate[f[x], x],
+                 int[(a_)^(x_), x_] :> Integrate[a^x, x] /; FreeQ[a, x]};
+
+intConstantRule = int[c_, x_] :> c*x /; FreeQ[c, x];
+
+intLinearityRule = {int[f_ + g_, x_] :> int[f, x] + int[g, x],
+                 int[c_ f_, x_] :> c int[f, x] /; FreeQ[c, x]};
+
+intPowerRule = {int[x_, x_] :> x^2 / 2, int[1/x_, x_] :> Log[x], int[(x_)^(a_), x_] :> x^(a + 1)/(a + 1) /; FreeQ[a, x]};
+
+intProductRule = int[f_ g_, x_] :> int[f, x] g - int[int[f, x] * d[g, x], x];
+
+(*intSubstitutionRule = {int[(f_)[g_], x_] :> /; };*)
+
+(*dChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
+             d[(a_)^(f_), x_] :> Log[a]*a^f*d[f, x] /; FreeQ[a, x],
+             d[(f_)[g_], x_] :> (D[f[x], x] /. x -> g)*d[g, x],
+             d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};*)
+
+$intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Product Rule"};
+
+displayIntegral[expr_, k_Integer] := CellPrint[
+  Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], $intRuleNames[[k]], 
+     LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
+   CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+   CellFrame -> False, CellEditDuplicate -> False]];
+
+walkInt[f_, x_] := Module[{integral, oldintegral, k}, 
+        integral = int[f, x]; displayStart[integral];
+        While[! FreeQ[integral, int],
+            oldintegral = integral; k = 0;
+            While[oldintegral == integral,
+                      k++;
+                      integral = integral /. 
+                              ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]]];
+            displayIntegral[integral, k];
+            While[! FreeQ[integral, d],
+            	oldintegral = integral; k = 0;
+            	While[oldintegral == integral,
+                    k++;
+                    integral = integral /. 
+                              ToExpression["d" <> StringReplace[$dRuleNames[[k]], " " -> ""]]];
+            	displayDerivative[integral, k]];
+            ];
+        Integrate[f, x]];
 
 End[];
 
