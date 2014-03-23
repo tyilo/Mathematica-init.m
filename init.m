@@ -138,7 +138,7 @@ fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, par
 fitPlot[data_, expr_, pars_, vars_] := fitPlot[data, expr, pars, vars, Sequence@{}];
 
 plotWithPoints[expr_, {x_, xmin_, xmax_}, xs_, options:OptionsPattern[Plot]] := Plot[expr, {x, xmin, xmax},
-	Epilog -> {Black, PointSize[Medium], Point@Table[{n, expr /. x -> n}, {n, xs}]},
+	Epilog -> {Black, PointSize[Medium], Table[Tooltip[Point[{n, expr /. x -> n}], {n, expr /. x -> n}], {n, xs}]},
 	options
 ];
 
