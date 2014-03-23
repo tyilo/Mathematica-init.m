@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-23 14:57 *)
+(* Timestamp: 2014-03-23 16:22 *)
 
 (** User Mathematica initialization file **)
 
@@ -216,7 +216,7 @@ thermodynamicData = {{"Ag(s)", 0, 42.55, 0}, {"Ag+(aq)", 105.79, 73.45, 77.16},
  {"SO3(g)", -395.72, 256.83, -371.03}};
 
 deltaThermo[reactants_ -> products_, i_Integer, rule_List] := 
-  Quantity[(products /. rule) - (reactants /. rule), 
+  Quantity[(removeSubscript //@ products /. rule) - (removeSubscript //@ reactants /. rule), 
    Evaluate@
     If[i == 2, "Joules"/("Moles"*"Kelvins"), "Kilojoules"/"Moles"]];
 deltaThermo[r_Rule, i_Integer] := 
@@ -340,7 +340,7 @@ Export[name <> ".gif",
 	 man],"ImageList"][[1 ;; -1 ;; step]]
 ];
 
-numPlot[ss_,{s_,e_},ee_]:=intPlot[{{ss,{s,e},ee}}];
+numPlot[ss_,{s_,e_},ee_]:=numPlot[{{ss,{s,e},ee}}];
 numPlot[ints:{{_String,{_?NumericQ,_?NumericQ},_String}..}]:=Module[{i=0,c=ColorData[1,"ColorList"]},With[{min=Min[ints[[All,2,1]]],max=Max[ints[[All,2,2]]]},Graphics[Table[With[{ss=int[[1]],s=int[[2,1]],e=int[[2,2]],ee=int[[3]]},{c[[++i+1]],Thickness[.01],Text[Style[ss,Large,c[[i+1]],Bold],{s,i}],Text[Style[ee,Large,c[[i+1]],Bold],{e,i}],Line[{{s,i},{e,i}}]}],{int,ints}],Axes->{True,False},AxesStyle->Directive[Thin,Blue,12],PlotRange->{{0,max+.2 Abs@(min-max)},{0,++i}},AspectRatio->.2]]];
  
 SetAttributes[traceViewCompact, {HoldAllComplete}];
