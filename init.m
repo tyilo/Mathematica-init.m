@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-24 13:00 *)
+(* Timestamp: 2014-03-24 14:38 *)
 
 (** User Mathematica initialization file **)
 
@@ -43,6 +43,8 @@ updateInitFile[] := (
 	
 	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
 );
+
+reloadInitFile[] := Import@ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 
 fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
 
@@ -371,8 +373,18 @@ Module[{steps = {}, stack = {}, pre, post, show, default = False},
 		Column@{Opener@Dynamic@default, 
 		Dynamic@Pane[First@steps, ImageSize -> 10000]}];
 
-Format[d[f_, x_], TraditionalForm] := DisplayForm[RowBox[{FractionBox["\[DifferentialD]",
-                                                  RowBox[{"\[DifferentialD]", x}]], f}]];
+(*Format[d[f_, x_], TraditionalForm] := DisplayForm[RowBox[{FractionBox["\[DifferentialD]",
+                                                  RowBox[{"\[DifferentialD]", x}]], f}]];*)
+
+Format[d[f_, x_], TraditionalForm] := (
+	paren = MatchQ[f,Plus[_,__]];
+	boxes = RowBox[{f}];
+	If[paren,
+		boxes = RowBox[{"(", boxes, ")"}]
+	];
+	boxes = RowBox[{FractionBox["\[DifferentialD]", RowBox[{"\[DifferentialD]", x}]], boxes}];
+	DisplayForm[boxes]
+);
 
 dSpecificRules = {d[x_, x_] :> 1, d[(f_)[x_], x_] :> D[f[x], x],
                  d[(a_)^(x_), x_] :> D[a^x, x] /; FreeQ[a, x]};
@@ -406,7 +418,7 @@ displayStart[expr_] := CellPrint[
 
 displayDerivative[expr_, k_Integer] := CellPrint[
   Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
-       MakeBoxes[HoldForm[expr], TraditionalForm]}], $dRuleNames[[k]], 
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], "Differentation: " <> $dRuleNames[[k]], 
      LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
    CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
    CellFrame -> False, CellEditDuplicate -> False]];
@@ -438,7 +450,6 @@ Format[int[f_,x_],TraditionalForm]:= (
 	boxes = RowBox[{boxes, "\[DifferentialD]", x}];
 	boxes = RowBox[{"\[Integral]", boxes}];
 	DisplayForm[boxes]
-	(*DisplayForm[RowBox[{"\[Integral]", If[paren,"(",""] , RowBox[{f}], If[paren,")",""],"\[DifferentialD]",x}]]*)
 );
 
 intSpecificRules = {int[(f_)[x_], x_] :> Integrate[f[x], x],
@@ -451,20 +462,22 @@ intLinearityRule = {int[f_ + g_, x_] :> int[f, x] + int[g, x],
 
 intPowerRule = {int[x_, x_] :> x^2 / 2, int[1/x_, x_] :> Log[x], int[(x_)^(a_), x_] :> x^(a + 1)/(a + 1) /; FreeQ[a, x]};
 
-intProductRule = int[f_ g_, x_] :> int[f, x] g - int[int[f, x] * d[g, x], x];
-
 intSubstitutionRule = {
 						int[(f_)^(a_), x_] :> ((Integrate[u^a, u] / d[f, x]) /. u -> f) /; FreeQ[a, x] && FreeQ[D[f, x], x],
-						int[(f_)^(a_) g_, x_] :> ((Integrate[u^a, u] / d[f, x]) * g /. u -> f) /; FreeQ[FullSimplify[D[f, x] / g], x],
+						int[(f_)^(a_) g_, x_] :> ((Integrate[u^a, u] / d[f, x]) * g /. u -> f) /; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
+						int[(a_)^(f_), x_] :> (a ^ f)/(d[f, x] * Log[a]) /; FreeQ[a, x] && FreeQ[D[f, x], x],
+						int[(a_)^(f_) g_, x_] :> (a ^ f)/(d[f, x] * Log[a]) * g /; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
 						int[(f_)[g_], x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] /; FreeQ[D[g, x], x],
 						int[(f_)[g_] h_, x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] * h /; FreeQ[FullSimplify[D[g, x] / h], x]
 					};
 
-$intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Product Rule", "Substitution Rule"};
+intProductRule = int[f_ g_, x_] :> int[f, x] g - int[int[f, x] * d[g, x], x];
+
+$intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Substitution Rule", "Product Rule"};
 
 displayIntegral[expr_, k_Integer] := CellPrint[
   Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
-       MakeBoxes[HoldForm[expr], TraditionalForm]}], $intRuleNames[[k]], 
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], "Integration: " <> $intRuleNames[[k]], 
      LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
    CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
    CellFrame -> False, CellEditDuplicate -> False]];
