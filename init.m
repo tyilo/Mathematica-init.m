@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-24 09:13 *)
+(* Timestamp: 2014-03-24 13:00 *)
 
 (** User Mathematica initialization file **)
 
@@ -411,12 +411,18 @@ displayDerivative[expr_, k_Integer] := CellPrint[
    CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
    CellFrame -> False, CellEditDuplicate -> False]];
 
+walkD::differentationError = "Failed to differentiate expression!";
+
 walkD[f_, x_] := Module[{derivative, oldderivative, k}, 
         derivative = d[f, x]; displayStart[derivative];
         While[! FreeQ[derivative, d],
             oldderivative = derivative; k = 0;
             While[oldderivative == derivative,
                       k++;
+                      If[k > Length@$dRuleNames,
+                      	Message[walkD::differentationError];
+                      	Return[D[f, x]];
+                	  ];
                       derivative = derivative /. 
                               ToExpression["d" <> StringReplace[$dRuleNames[[k]], " " -> ""]]];
             displayDerivative[derivative, k]];
@@ -447,14 +453,14 @@ intPowerRule = {int[x_, x_] :> x^2 / 2, int[1/x_, x_] :> Log[x], int[(x_)^(a_), 
 
 intProductRule = int[f_ g_, x_] :> int[f, x] g - int[int[f, x] * d[g, x], x];
 
-(*intSubstitutionRule = {int[(f_)[g_], x_] :> /; };*)
+intSubstitutionRule = {
+						int[(f_)^(a_), x_] :> ((Integrate[u^a, u] / d[f, x]) /. u -> f) /; FreeQ[a, x] && FreeQ[D[f, x], x],
+						int[(f_)^(a_) g_, x_] :> ((Integrate[u^a, u] / d[f, x]) * g /. u -> f) /; FreeQ[FullSimplify[D[f, x] / g], x],
+						int[(f_)[g_], x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] /; FreeQ[D[g, x], x],
+						int[(f_)[g_] h_, x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] * h /; FreeQ[FullSimplify[D[g, x] / h], x]
+					};
 
-(*dChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
-             d[(a_)^(f_), x_] :> Log[a]*a^f*d[f, x] /; FreeQ[a, x],
-             d[(f_)[g_], x_] :> (D[f[x], x] /. x -> g)*d[g, x],
-             d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};*)
-
-$intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Product Rule"};
+$intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Product Rule", "Substitution Rule"};
 
 displayIntegral[expr_, k_Integer] := CellPrint[
   Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
@@ -463,12 +469,19 @@ displayIntegral[expr_, k_Integer] := CellPrint[
    CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
    CellFrame -> False, CellEditDuplicate -> False]];
 
+walkInt::integrationError = "Failed to integrate expression!";
+walkInt::differentationError = "Failed to differentiate expression!";
+
 walkInt[f_, x_] := Module[{integral, oldintegral, k}, 
         integral = int[f, x]; displayStart[integral];
         While[! FreeQ[integral, int],
             oldintegral = integral; k = 0;
             While[oldintegral == integral,
                       k++;
+                      If[k > Length@$intRuleNames,
+                      	Message[walkInt::integrationError];
+                      	Return[Integrate[f, x]];
+                      ];
                       integral = integral /. 
                               ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]]];
             displayIntegral[integral, k];
@@ -476,6 +489,10 @@ walkInt[f_, x_] := Module[{integral, oldintegral, k},
             	oldintegral = integral; k = 0;
             	While[oldintegral == integral,
                     k++;
+                    If[k > Length@$dRuleNames,
+                      	Message[walkInt::differentationError];
+                      	Return[Integrate[f, x]];
+                    ];
                     integral = integral /. 
                               ToExpression["d" <> StringReplace[$dRuleNames[[k]], " " -> ""]]];
             	displayDerivative[integral, k]];
