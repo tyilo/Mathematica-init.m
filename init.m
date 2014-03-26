@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-24 14:38 *)
+(* Timestamp: 2014-03-27 00:42 *)
 
 (** User Mathematica initialization file **)
 
@@ -87,6 +87,8 @@ MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
 
 allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
+
+intInterval[expr_, {x_, xmin_, xmax_}] := (expr /. x -> xmax) - (expr /. x -> xmin)
 
 plotIntersect[f1_, f2_, o_, options_] := (
 	x = o[[1]];
