@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-27 00:42 *)
+(* Timestamp: 2014-03-27 01:24 *)
 
 (** User Mathematica initialization file **)
 
@@ -86,9 +86,20 @@ MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
 
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
 
+openNotationPalette[] := (
+	Notation`AutoLoadNotationPalette = True;
+	Unprotect @ Notation`Private`protected;
+	<< Notation`;
+);
+
 allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
 
 intInterval[expr_, {x_, xmin_, xmax_}] := (expr /. x -> xmax) - (expr /. x -> xmin)
+intInterval[expr_, {xmin_, xmax_}] := Block[{symbols, symbol},
+	symbols = Cases[expr, _Symbol, Infinity];
+	symbol = If[Length @ symbols == 0, Null, First @ symbols];
+	intInterval[expr, {symbol, xmin, xmax}]
+];
 
 plotIntersect[f1_, f2_, o_, options_] := (
 	x = o[[1]];
@@ -289,7 +300,7 @@ UnitConvert[n_, u_] := Block[{$inUnitConvert = True, fu},
 Protect[Quantity, UnitConvert];
 *)
 
-CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const" -> _];
+CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
 
 CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliases], {
 	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
@@ -313,7 +324,8 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 				RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
 			]
 		] &)
-	]
+	],
+	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"]
 }];
 
 solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
@@ -524,3 +536,5 @@ Notation`AutoLoadNotationPalette = False;
 Needs["Notation`"];
 Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
 Symbolize[ParsedBoxWrapper[OverscriptBox["_","_"]]];
+Notation[ParsedBoxWrapper[\(\(\[LeftBracketingBar] expr_ \[RightBracketingBar]\)\_a_\%b_\)] \[DoubleLongLeftRightArrow] 
+   ParsedBoxWrapper[\(intInterval[\(expr_, \({a_, b_}\)\)]\)]]
