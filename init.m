@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-27 01:24 *)
+(* Timestamp: 2014-03-30 21:36 *)
 
 (** User Mathematica initialization file **)
 
@@ -96,7 +96,7 @@ allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
 
 intInterval[expr_, {x_, xmin_, xmax_}] := (expr /. x -> xmax) - (expr /. x -> xmin)
 intInterval[expr_, {xmin_, xmax_}] := Block[{symbols, symbol},
-	symbols = Cases[expr, _Symbol, Infinity];
+	symbols = Select[Cases[expr, _Symbol, Infinity], N[#] === # &];
 	symbol = If[Length @ symbols == 0, Null, First @ symbols];
 	intInterval[expr, {symbol, xmin, xmax}]
 ];
