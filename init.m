@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-30 21:36 *)
+(* Timestamp: 2014-03-30 22:46 *)
 
 (** User Mathematica initialization file **)
 
@@ -328,6 +328,7 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"]
 }];
 
+pow00eq1[x_, y_] := If[x == 0 && y == 0, 1, x ^ y];
 solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 	equations = {};
 	variables = {};
@@ -339,8 +340,7 @@ solvePolynomialCoordinates[coordinates_] := (length = Length[coordinates];
 		For[j = 1,
 			j <= length,
 			j++,
-			rightHand += ToExpression[FromCharacterCode[96 + j]]*
-			coordinates[[i]][[1]]^(length - j);
+			rightHand += ToExpression[FromCharacterCode[96 + j]] * pow00eq1[coordinates[[i]][[1]], (length - j)];
 		];
 		equations = Append[equations, coordinates[[i]][[2]] == rightHand]
 	];
