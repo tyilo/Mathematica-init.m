@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-30 22:46 *)
+(* Timestamp: 2014-03-31 08:51 *)
 
 (** User Mathematica initialization file **)
 
@@ -94,9 +94,13 @@ openNotationPalette[] := (
 
 allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
 
+intInterval::multipleSymbols = "Found multiples symbols in expression: `1`. Using the symbol `2`.";
 intInterval[expr_, {x_, xmin_, xmax_}] := (expr /. x -> xmax) - (expr /. x -> xmin)
 intInterval[expr_, {xmin_, xmax_}] := Block[{symbols, symbol},
-	symbols = Select[Cases[expr, _Symbol, Infinity], N[#] === # &];
+	symbols = DeleteDuplicates @ Select[Cases[expr, _Symbol, Infinity], N[#] === # &];
+	If[Length @ symbols > 1,
+		Message[intInterval::multipleSymbols, symbols, First @ symbols];
+	];
 	symbol = If[Length @ symbols == 0, Null, First @ symbols];
 	intInterval[expr, {symbol, xmin, xmax}]
 ];
