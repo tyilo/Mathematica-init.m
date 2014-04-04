@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-03-31 08:51 *)
+(* Timestamp: 2014-04-05 01:41 *)
 
 (** User Mathematica initialization file **)
 
@@ -123,14 +123,19 @@ plotDefiniteIntegral[expr_, {x_, xmin_, xmax_}, margin_] := Show@{
 
 plotDefiniteIntegral[expr_, {x_, xmin_, xmax_}] := plotDefiniteIntegral[expr, {x, xmin, xmax}, (xmax - xmin) / 6];
 
-fitPlotOptions = {showFunction, showParams, showRSquared};
-Options[fitPlot] = Table[x -> True, {x, fitPlotOptions}] ~Join~ Options[Plot];
+fitPlotOptionNames = {showFunction, showParams, showRSquared, printLabels};
+Options[fitPlot] = Table[x -> True, {x, fitPlotOptionNames}] ~Join~ Options[Plot] ~Join~ Options[NonlinearModelFit];
 
-fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, params, col1, plotRange, xmin, xmax, labelOptions, labels, R, otherOptions, fitted},
+fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{nonlinearModelFitOptionNames, plotOptionNames, nonlinearModelFitOptions, plotOptions, fit, params, col1, plotRange, xmin, xmax, labelOptions, labels, R, otherOptions, fitted},
 	Assert[Length@Dimensions[data] >= 2 && Dimensions[data][[2]] == 2];
 	Assert[Head@vars == Symbol];
 	
-	fit = NonlinearModelFit[data, expr, pars, vars];
+	nonlinearModelFitOptionNames = First /@ Options[NonlinearModelFit];
+	plotOptionNames = Complement[First /@ Options[Plot], nonlinearModelFitOptionNames];
+	
+	{nonlinearModelFitOptions, plotOptions} = Table[Cases[{options}, HoldPattern @ Evaluate[Alternatives @@ l -> _]], {l, {nonlinearModelFitOptionNames, plotOptionNames}}];
+	
+	fit = NonlinearModelFit[data, expr, pars, vars, Evaluate[Sequence @@ nonlinearModelFitOptions]];
 	params = fit["BestFitParameters"];
 	col1 = data[[All,1]];
 	plotRange = OptionValue[PlotRange];
@@ -140,17 +145,19 @@ fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{fit, par
 	];
 	xmin = xmin /. Automatic -> Min[col1];
 	xmax = xmax /. Automatic -> Max[col1];
-	labelOptions = fitPlotOptions;
+	labelOptions = Complement[fitPlotOptionNames, {printLabels}];
 	labels = Flatten@Position[OptionValue[#] & /@ labelOptions, True] /. {
 		1 -> Normal[fit],
 		2 -> params,
 		3 -> R^2 == fit["RSquared"]
 	};
-	otherOptions = Sequence @@ DeleteCases[{options}, Alternatives @@ fitPlotOptions -> _];
+	If[OptionValue[printLabels],
+		Print[Column @ labels]
+	];
 	Plot[fit[vars], {vars, xmin, xmax},
 		PlotLabel -> Column@labels,
 		Epilog -> {PointSize[Medium], Point[data]},
-		Evaluate @ otherOptions
+		Evaluate[Sequence @@ plotOptions]
 	]
 ];
 
