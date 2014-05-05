@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-04-29 09:40 *)
+(* Timestamp: 2014-05-05 12:42 *)
 
 (** User Mathematica initialization file **)
 
@@ -317,7 +317,7 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
 		"QuantityUnit", Tooltip -> "Unit Template", 
 		DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-		InterpretationFunction -> (With[{unit = #2 /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+		InterpretationFunction -> (With[{unit = #2 /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
 			(*Print[unit];*)
 			If[KnownUnitQ@@MakeExpression@unit,
 				RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
@@ -328,7 +328,7 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 	"const" -> TemplateBox[{"\[SelectionPlaceholder]"}, 
 		"Constant", Tooltip -> "Constant Template", 
 		DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
-		InterpretationFunction -> (With[{const = # /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
+		InterpretationFunction -> (With[{const = # /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
 			(*Print[const];*)
 			If[KnownUnitQ@@MakeExpression@const,
 				RowBox[{"Quantity", "[", 1, ",", const, "]"}],
