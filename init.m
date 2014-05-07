@@ -48,6 +48,14 @@ reloadInitFile[] := Import@ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 
 fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
 
+preloadPaclets[] := (
+	ChemicalData[All,Preload];
+	ElementData[All,Preload];
+	AstronomicalData[All,Preload];
+	ParticleData[All,Preload];
+	RebuildPacletData[];
+);
+
 SinDeg[d_] := Sin[d * Degree];
 CosDeg[d_] := Cos[d * Degree];
 TanDeg[d_] := Tan[d * Degree];
@@ -93,6 +101,7 @@ openNotationPalette[] := (
 );
 
 allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
+propertyWithUnits[f_, args__] := Quantity[f[args], f[args, "Units"]];
 
 intInterval::multipleSymbols = "Found multiples symbols in expression: `1`. Using the symbol `2`.";
 intInterval[expr_, {x_, xmin_, xmax_}] := (expr /. x -> xmax) - (expr /. x -> xmin)
