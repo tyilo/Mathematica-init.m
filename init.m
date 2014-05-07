@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-05 12:42 *)
+(* Timestamp: 2014-05-07 17:00 *)
 
 (** User Mathematica initialization file **)
 
@@ -294,27 +294,13 @@ constantFullName[str_String] := fullName[str, $constantAbbreviations];
 knownConstantAbbreviationQ[str_String] := constantFullName[str] =!= Null;
 
 fullUnit[u_] := Module[{}, 
-	Hold @ Evaluate[u /. {s_String?LetterQ :> unitFullName[s], CenterDot -> Times}]
+	Evaluate[u /. {s_String?LetterQ :> fullName[s, $unitAbbreviations ~ Join ~ $constantAbbreviations], CenterDot -> Times}]
 ];
 
-(* Next line required for Unprotect to work, see http://stackoverflow.com/a/5649618/640584 *)
-(*
-{Block, Hold, Evaluate, FullUnit, If, KnownUnitQ, Quantity, UnitConvert, ReleaseHold, TrueQ};
-Unprotect[Quantity, UnitConvert];
-Quantity[n_, u_] := Block[{$inQuantity = True, fu},
-	fu = fullUnit[u];
-	If[KnownUnitQ @@ fu,
-		Quantity[n, ReleaseHold @ fu],
-		Quantity[n, u]
-	]] /; !TrueQ[$inQuantity] (* && !KnownUnitQ[u] *)
-UnitConvert[n_, u_] := Block[{$inUnitConvert = True, fu},
-	fu = fullUnit[u];
-	If[KnownUnitQ @@ fu,
-		Quiet @ UnitConvert[n, ReleaseHold @ fu],
-		UnitConvert[n, u]
-	]] /; !TrueQ[$inUnitConvert] (* && !KnownUnitQ[u] *)
-Protect[Quantity, UnitConvert];
-*)
+quantity[u_] := Quantity[fullUnit@u];
+quantity[m_, u_] := Quantity[m, fullUnit@u];
+unitConvert[q_] := UnitConvert[q];
+unitConvert[q_, u_] := UnitConvert[q, fullUnit@u];
 
 CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
 
