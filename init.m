@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-07 17:00 *)
+(* Timestamp: 2014-05-08 22:02 *)
 
 (** User Mathematica initialization file **)
 
@@ -101,7 +101,7 @@ openNotationPalette[] := (
 	<< Notation`;
 );
 
-allProperties[f_, elem_] := TableForm[{#, f[elem, #]} & /@ f["Properties"]];
+allProperties[f_, elem_] := Grid[{#, f[elem, #]} & /@ f["Properties"], Background -> {None, {{White, Lighter[Gray, 2/3]}}}];
 propertyWithUnits[f_, args__] := Quantity[f[args], f[args, "Units"]];
 
 intInterval::multipleSymbols = "Found multiples symbols in expression: `1`. Using the symbol `2`.";
