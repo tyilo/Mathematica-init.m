@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-08 22:02 *)
+(* Timestamp: 2014-05-23 22:41 *)
 
 (** User Mathematica initialization file **)
 
@@ -351,6 +351,10 @@ solvePolynomialCoordinates[coordinates_] := Module[{length, equations, variables
 ];
 
 (* Borrowed definitions *)
+
+(* http://mathematica.stackexchange.com/a/40168/704 *)
+Attributes[hold] = {HoldAll};
+hold[x_] := HoldForm@x /. Cases[Hold@x, s_Symbol :> (HoldPattern@s -> s), Infinity];
 
 manToGif[man_, name_String, step_Integer] :=
 Export[name <> ".gif",
