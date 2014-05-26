@@ -341,7 +341,7 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]","\[Placeholder]"},{"\[Placeholder]","\[Placeholder]"}}]},
 		"Identity",
 		DisplayFunction -> (RowBox[{
-			StyleBox["[", SpanMaxSize -> \[Infinity]], #1, StyleBox["]", SpanMaxSize -> Infinity]
+			StyleBox["[", SpanMaxSize -> Infinity], #1, StyleBox["]", SpanMaxSize -> Infinity]
 		}] &)],
 	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"]
 }];
