@@ -45,6 +45,17 @@ updateInitFile[] := Module[{initPath, current, f, newest},
 	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
 ];
 
+Module[{path, systemPath, userPath},
+	path = FileNameJoin@{"SystemFiles", "FrontEnd", "TextResources", $OperatingSystem /. "MacOSX"->"Macintosh", "KeyEventTranslations.tr"};
+	systemPath = FileNameJoin@{$InstallationDirectory, path};
+	userPath = FileNameJoin@{$UserBaseDirectory, path};
+	If[FileExistsQ@systemPath,
+		If[FileExistsQ@userPath,
+			Null
+		];
+	];
+];
+
 reloadInitFile[] := Import@ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 
 fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
@@ -327,6 +338,11 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 			]
 		] &)
 	],
+	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]","\[Placeholder]"},{"\[Placeholder]","\[Placeholder]"}}]},
+		"Identity",
+		DisplayFunction -> (RowBox[{
+			StyleBox["[", SpanMaxSize -> \[Infinity]], #1, StyleBox["]", SpanMaxSize -> Infinity]
+		}] &)],
 	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"]
 }];
 
