@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-26 14:10 *)
+(* Timestamp: 2014-05-26 14:15 *)
 
 (** User Mathematica initialization file **)
 
@@ -200,21 +200,21 @@ plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]	
 ];
 
-plotVectors[v_?MatrixQ, o_List] := Module[{n = Dimensions[v][[2]], graphics},
+plotVectors[v_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n = Dimensions[v][[2]], graphics},
 	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
 	Assert[graphics != Null];
-	Show[graphics@Append[o, Arrow[{Array[0&, n], Flatten@#}]]& /@ v]
+	Show[graphics@Append[o, Arrow[{Array[0&, n], Flatten@#}]]& /@ v, opt]
 ];
-plotVectors[v_?MatrixQ] := plotVectors[v, {}];
-plotVectors[v_?VectorQ, o_List] := plotVectors[{v}, o];
-plotVectors[v_?VectorQ] := plotVectors[{v}];
+plotVectors[v_?MatrixQ, opt:OptionsPattern[Show]] := plotVectors[v, {}, opt];
+plotVectors[v_?VectorQ, o_List, opt:OptionsPattern[Show]] := plotVectors[{v}, o, opt];
+plotVectors[v_?VectorQ, opt:OptionsPattern[Show]] := plotVectors[{v}, opt];
 
-unitArrows[m_?MatrixQ] := Module[{n=Length@m, graphics},
+unitArrows[m_?MatrixQ, opt:OptionsPattern[Show]] := Module[{n=Length@m, graphics},
 	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
 	Assert[graphics != Null];
-	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green}]
+	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green}, opt]
 ];
-unitArrows[n_?NumberQ] := unitArrows[Table[UnitVector[n, i], {i, 1, n}]];
+unitArrows[n_?NumberQ, opt:OptionsPattern[Show]] := unitArrows[Table[UnitVector[n, i], {i, 1, n}], opt];
 
 lineElementPlot[f_, x_, y_, options:OptionsPattern[VectorPlot]] := VectorPlot[
 	Normalize@{1, f}, x, y, options,
