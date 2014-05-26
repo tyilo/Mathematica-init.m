@@ -338,8 +338,15 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 			]
 		] &)
 	],
-	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]","\[Placeholder]"},{"\[Placeholder]","\[Placeholder]"}}]},
-		"Identity",
+	"vect" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
+		"Vector",
+		DisplayFunction -> (RowBox[{
+			StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
+		}] &),
+		InterpretationFunction -> (RowBox[{"Flatten", "[", #, "]"}]&)
+	],
+	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]", "\[Placeholder]"}, {"\[Placeholder]", "\[Placeholder]"}}]},
+		"Matrix",
 		DisplayFunction -> (RowBox[{
 			StyleBox["[", SpanMaxSize -> Infinity], #1, StyleBox["]", SpanMaxSize -> Infinity]
 		}] &)],
