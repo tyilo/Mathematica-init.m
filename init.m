@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-26 12:39 *)
+(* Timestamp: 2014-05-26 14:10 *)
 
 (** User Mathematica initialization file **)
 
@@ -199,6 +199,22 @@ plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 	{{a, Mean[param1[[2 ;; 3]]], "x"}, param1[[2]], param1[[3]]},
 	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]	
 ];
+
+plotVectors[v_?MatrixQ, o_List] := Module[{n = Dimensions[v][[2]], graphics},
+	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
+	Assert[graphics != Null];
+	Show[graphics@Append[o, Arrow[{Array[0&, n], Flatten@#}]]& /@ v]
+];
+plotVectors[v_?MatrixQ] := plotVectors[v, {}];
+plotVectors[v_?VectorQ, o_List] := plotVectors[{v}, o];
+plotVectors[v_?VectorQ] := plotVectors[{v}];
+
+unitArrows[m_?MatrixQ] := Module[{n=Length@m, graphics},
+	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
+	Assert[graphics != Null];
+	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green}]
+];
+unitArrows[n_?NumberQ] := unitArrows[Table[UnitVector[n, i], {i, 1, n}]];
 
 lineElementPlot[f_, x_, y_, options:OptionsPattern[VectorPlot]] := VectorPlot[
 	Normalize@{1, f}, x, y, options,
