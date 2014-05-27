@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-26 14:15 *)
+(* Timestamp: 2014-05-27 10:28 *)
 
 (** User Mathematica initialization file **)
 
@@ -207,14 +207,16 @@ plotVectors[v_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n = Dimensi
 ];
 plotVectors[v_?MatrixQ, opt:OptionsPattern[Show]] := plotVectors[v, {}, opt];
 plotVectors[v_?VectorQ, o_List, opt:OptionsPattern[Show]] := plotVectors[{v}, o, opt];
-plotVectors[v_?VectorQ, opt:OptionsPattern[Show]] := plotVectors[{v}, opt];
+plotVectors[v_?VectorQ, opt:OptionsPattern[Show]] := plotVectors[v, {}, opt];
 
-unitArrows[m_?MatrixQ, opt:OptionsPattern[Show]] := Module[{n=Length@m, graphics},
+unitArrows[m_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n=Length@m, graphics},
 	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
 	Assert[graphics != Null];
-	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green}, opt]
+	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green} ~ Join ~ o, opt]
 ];
-unitArrows[n_?NumberQ, opt:OptionsPattern[Show]] := unitArrows[Table[UnitVector[n, i], {i, 1, n}], opt];
+unitArrows[m_?MatrixQ, opt:OptionsPattern[Show]] := unitArrows[m, {}, opt];
+unitArrows[n_?NumberQ, o_List, opt:OptionsPattern[Show]] := unitArrows[Table[UnitVector[n, i], {i, 1, n}], o, opt];
+unitArrows[n_?NumberQ, opt:OptionsPattern[Show]] := unitArrows[n, {}, opt];
 
 lineElementPlot[f_, x_, y_, options:OptionsPattern[VectorPlot]] := VectorPlot[
 	Normalize@{1, f}, x, y, options,
