@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-27 10:28 *)
+(* Timestamp: 2014-05-27 10:39 *)
 
 (** User Mathematica initialization file **)
 
@@ -203,7 +203,7 @@ plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 plotVectors[v_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n = Dimensions[v][[2]], graphics},
 	graphics = If[n==2, Graphics, If[n==3, Graphics3D, Null]];
 	Assert[graphics != Null];
-	Show[graphics@Append[o, Arrow[{Array[0&, n], Flatten@#}]]& /@ v, opt]
+	Show[graphics[Append[o, Arrow[{Array[0&, n], Flatten@#}]]& /@ v, Method -> {"AxesInFront" -> False}], opt]
 ];
 plotVectors[v_?MatrixQ, opt:OptionsPattern[Show]] := plotVectors[v, {}, opt];
 plotVectors[v_?VectorQ, o_List, opt:OptionsPattern[Show]] := plotVectors[{v}, o, opt];
