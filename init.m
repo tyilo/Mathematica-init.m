@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-05-27 10:39 *)
+(* Timestamp: 2014-08-24 01:45 *)
 
 (** User Mathematica initialization file **)
 
@@ -215,7 +215,7 @@ unitArrows[m_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n=Length@m, 
 	plotVectors[Table[m . UnitVector[n, i], {i, 1, n}], {Thick, Darker@Green} ~ Join ~ o, opt]
 ];
 unitArrows[m_?MatrixQ, opt:OptionsPattern[Show]] := unitArrows[m, {}, opt];
-unitArrows[n_?NumberQ, o_List, opt:OptionsPattern[Show]] := unitArrows[Table[UnitVector[n, i], {i, 1, n}], o, opt];
+unitArrows[n_?NumberQ, o_List, opt:OptionsPattern[Show]] := unitArrows[IdentityMatrix[n], o, opt];
 unitArrows[n_?NumberQ, opt:OptionsPattern[Show]] := unitArrows[n, {}, opt];
 
 lineElementPlot[f_, x_, y_, options:OptionsPattern[VectorPlot]] := VectorPlot[
@@ -545,9 +545,18 @@ displayIntegral[expr_, k_Integer] := CellPrint[
 walkInt::integrationError = "Failed to integrate expression!";
 walkInt::differentationError = "Failed to differentiate expression!";
 
-walkInt[f_, x_] := Module[{integral, oldintegral, k}, 
+walkInt[f_, x_] := Module[{integral, oldintegral, k, leafcounts, ruleused},
 	integral = int[f, x]; displayStart[integral];
+	leafcounts = {};
+	ruleused = "";
 	While[! FreeQ[integral, int],
+		If[ruleused == "Product Rule",
+			AppendTo[leafcounts, LeafCount @ integral];
+			If[Length @ leafcounts >= 5 && OrderedQ @ Take[leafcounts, -5],
+				Message[walkInt::integrationError];
+				Return[Integrate[f, x]];
+			];
+		];
 		oldintegral = integral; k = 0;
 		While[oldintegral == integral,
 			k++;
@@ -557,6 +566,7 @@ walkInt[f_, x_] := Module[{integral, oldintegral, k},
 			];
 			integral = integral /. ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]]
 		];
+		ruleused = $intRuleNames[[k]];
 		displayIntegral[integral, k];
 		While[! FreeQ[integral, d],
 			oldintegral = integral; k = 0;
