@@ -1,7 +1,14 @@
 (* ::Package:: *)
-(* Timestamp: 2014-08-28 07:47 *)
+(* Timestamp: 2014-08-28 22:33 *)
 
 (** User Mathematica initialization file **)
+
+$minVersion = 10;
+
+If[$VersionNumber < $minVersion,
+	MessageDialog["You need at least Mathematica v" <> ToString @ $minVersion <>
+		" to use this init.m file.\nYou're using Mathematica v" <> First @ StringSplit[$Version, " "] <> "."]
+];
 
 (* Needed to make function appear in the auto-complete prompt *)
 Begin["System`"];
@@ -14,8 +21,24 @@ Protect[WolframAlpha];
 
 (* My definitions *)
 
+Module[{t},
+	t = CreateScheduledTask[
+		"initFileScheduledTask";
+		If[URLFetch@"http://example.org/" =!= Null,
+			t = Select[ScheduledTasks[],
+				StringMatchQ[ToString@#[[2]], StartOfString ~~ "initFileScheduledTask" ~~ ___] &
+			];
+			RemoveScheduledTask @ t;
+			updateInitFile[FromInitFile -> True];
+		],
+		1
+	];
+	StartScheduledTask @ t;
+];
+
 updateInitFile::networkError = "Failed to retrieve the latest init.m version from github.";
-updateInitFile[] := Module[{initPath, current, f, newest},
+Options[updateInitFile] := {DryRun -> False, FromInitFile -> False};
+updateInitFile[options:OptionsPattern[]] := Module[{initPath, current, f, newest, m},
 	initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 	f = OpenRead@initPath;
 	current = StringJoin@ReadList[f, Character];
@@ -35,14 +58,22 @@ updateInitFile[] := Module[{initPath, current, f, newest},
 		DateList@m[[1]]
 	];
 	
-	If[DateDifference[getTimestamp@current, getTimestamp@newest] <= 0,
+	If[QuantityMagnitude@DateDifference[getTimestamp@current, getTimestamp@newest] <= 0,
 		Return["Your init.m is already at the latest version."];
 	];
 	
-	WriteString[f = OpenWrite@initPath, newest];
-	Close@f;
 	
-	"Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes."
+	If[OptionValue[DryRun] == False,
+		WriteString[f = OpenWrite@initPath, newest];
+		Close@f,
+		Print@"Dry run, init.m not changed."
+	];
+	
+	m = "Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes.";
+	If[OptionValue[FromInitFile]
+		MessageDialog @ m;,
+		m
+	]
 ];
 
 Module[{path, systemPath, userPath},
@@ -390,6 +421,18 @@ solvePolynomialCoordinates[coordinates_] := Module[{length, equations, variables
 	];
 	Solve[equations, variables][[1]]
 ];
+
+polarRegionPlot[pred_, {th_, thmin_, thmax_}, {r_, rmin_, rmax_}, options:OptionsPattern[RegionPlot]] := Module[{x, y, th2}, RegionPlot[
+	pred /. {r -> Sqrt[x^2 + y^2], th -> ArcTan[x, y]}, {x, -rmax, rmax}, {y, -rmax, rmax},
+	Frame -> False,
+	Epilog -> First @ PolarPlot[rmax, {th2, 0, $MachineEpsilon},
+		PolarAxes -> True,
+		PolarGridLines -> {Automatic, Range[rmax]},
+		PolarTicks -> {Drop[Table[i, {i, 0, 2 Pi, Pi/4}], -1], Automatic}
+	],
+	PlotRangePadding -> Floor@({rmax, rmax} / 3 + 1),
+	options
+]];
 
 (* Borrowed definitions *)
 
