@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-08-24 01:45 *)
+(* Timestamp: 2014-08-28 07:47 *)
 
 (** User Mathematica initialization file **)
 
@@ -468,7 +468,7 @@ dChainRule = {d[(f_)^(a_), x_] :> a*f^(a - 1)*d[f, x] /; FreeQ[a, x],
              d[(f_)^(g_), x_] :> f^g*d[g*Log[f], x]};
 
 $dRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule",
-              "Product Rule", "Quotient Rule", "Inverse Function Rule", "Chain Rule"};
+              "Quotient Rule", "Product Rule", "Inverse Function Rule", "Chain Rule"};
 
 displayStart[expr_] := CellPrint[
 	Cell[BoxData[MakeBoxes[HoldForm[expr], TraditionalForm]], "Output", 
