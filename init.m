@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-08-28 22:33 *)
+(* Timestamp: 2014-09-01 01:19 *)
 
 (** User Mathematica initialization file **)
 
@@ -423,7 +423,7 @@ solvePolynomialCoordinates[coordinates_] := Module[{length, equations, variables
 ];
 
 polarRegionPlot[pred_, {th_, thmin_, thmax_}, {r_, rmin_, rmax_}, options:OptionsPattern[RegionPlot]] := Module[{x, y, th2}, RegionPlot[
-	pred /. {r -> Sqrt[x^2 + y^2], th -> ArcTan[x, y]}, {x, -rmax, rmax}, {y, -rmax, rmax},
+	pred /. {r -> Sqrt[x^2 + y^2], th -> Mod[ArcTan[x, y], 2 Pi]}, {x, -rmax, rmax}, {y, -rmax, rmax},
 	Frame -> False,
 	Epilog -> First @ PolarPlot[rmax, {th2, 0, $MachineEpsilon},
 		PolarAxes -> True,
