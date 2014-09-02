@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-09-01 01:19 *)
+(* Timestamp: 2014-09-02 17:52 *)
 
 (** User Mathematica initialization file **)
 
@@ -433,6 +433,43 @@ polarRegionPlot[pred_, {th_, thmin_, thmax_}, {r_, rmin_, rmax_}, options:Option
 	PlotRangePadding -> Floor@({rmax, rmax} / 3 + 1),
 	options
 ]];
+
+walkRowReduce[matrix_?MatrixQ] := Module[{copy, sorted, rows, cols, r, c, first, el},
+	copy = matrix[[ ;; ]];
+	Print[copy];
+	{rows, cols} = Dimensions@copy;
+	Assert[rows == cols - 1];
+	sorted = SortBy[copy, FirstPosition[x_ /; x != 0]];
+	If[copy != sorted,
+		copy = sorted;
+		Print["Switching rows:"];
+		Print[copy];
+	];
+	For[c = 1, c <= cols - 1, c++,
+		el = copy[[c, c]];
+		If[el == 0,
+			Continue[];
+		];
+		If[el != 1,
+			Print["Dividing row ", c, " with ", el, ":"];
+			copy[[c]] /= el;
+			Print[copy];
+		];
+		For[r = 1, r <= rows, r++,
+			If[r == c,
+				Continue[];
+			];
+			el = copy[[r, c]];
+			If[el != 0,
+				Print["Subtracting ", el, " times row ", c, " from row ", r, ":"];
+				copy[[r]] -= el * copy[[c]];
+				Print[copy];
+			];
+		];
+	];
+	
+	RowReduce@matrix
+];
 
 (* Borrowed definitions *)
 
