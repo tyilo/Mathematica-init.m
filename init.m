@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-09-02 17:52 *)
+(* Timestamp: 2014-09-03 13:41 *)
 
 (** User Mathematica initialization file **)
 
@@ -438,14 +438,13 @@ walkRowReduce[matrix_?MatrixQ] := Module[{copy, sorted, rows, cols, r, c, first,
 	copy = matrix[[ ;; ]];
 	Print[copy];
 	{rows, cols} = Dimensions@copy;
-	Assert[rows == cols - 1];
 	sorted = SortBy[copy, FirstPosition[x_ /; x != 0]];
 	If[copy != sorted,
 		copy = sorted;
 		Print["Switching rows:"];
 		Print[copy];
 	];
-	For[c = 1, c <= cols - 1, c++,
+	For[c = 1, c <= Min[cols - 1, rows], c++,
 		el = copy[[c, c]];
 		If[el == 0,
 			Continue[];
