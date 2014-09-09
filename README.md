@@ -6,6 +6,15 @@ Installing
 
 Place in `init.m` in `ToFileName[{$UserBaseDirectory,"Kernel"},"init.m"]` and restart Mathematica.
 
+Or you could just run this in Mathematica:
+
+```
+newest = URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
+initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
+WriteString[f = OpenWrite@initPath, newest];
+Close@f;
+```
+
 Updating
 -------------
 
