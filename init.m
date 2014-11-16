@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-11-16 22:41 *)
+(* Timestamp: 2014-11-17 00:06 *)
 
 (** User Mathematica initialization file **)
 
@@ -673,7 +673,7 @@ walkInt[f_, x_] := Module[{integral, oldintegral, extrainfo, k, leafcounts, rule
 			];
 			integral = integral /. ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]];
 			If[Head @ integral === List,
-				extrainfo = Last @ integral;
+				extrainfo = First @ Cases[Last @ integral, _String];
 				integral = First @ integral;
 			];
 		];
@@ -689,8 +689,9 @@ walkInt[f_, x_] := Module[{integral, oldintegral, extrainfo, k, leafcounts, rule
 				];
 				integral = integral /. ToExpression["d" <> StringReplace[$dRuleNames[[k]], " " -> ""]]
 			];
-			displayDerivative[integral, k]];
+			displayDerivative[integral, k];
 		];
+	];
 	Integrate[f, x]
 ];
 
