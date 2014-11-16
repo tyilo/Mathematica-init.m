@@ -44,31 +44,31 @@ updateInitFile[options:OptionsPattern[]] := Module[{initPath, current, f, newest
 	current = StringJoin@ReadList[f, Character];
 	Close@f;
 	newest = URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
-	
+
 	If[newest == $Failed || StringSplit[newest, "\n"][[1]] != "(* ::Package:: *)",
 		Message[updateInitFile::networkError];
 		Return[];
 	];
-	
+
 	(* URLFetch truncates the last newline *)
 	newest = newest <> "\n";
-	
+
 	getTimestamp[str_] := Module[{m},
 		m = StringCases[str, StartOfLine ~~ "(* Timestamp: " ~~ Shortest@x__ ~~ " *)" ~~ EndOfLine :> x];
 		DateList@m[[1]]
 	];
-	
+
 	If[QuantityMagnitude@DateDifference[getTimestamp@current, getTimestamp@newest] <= 0,
 		Return["Your init.m is already at the latest version."];
 	];
-	
-	
+
+
 	If[OptionValue[DryRun] == False,
 		WriteString[f = OpenWrite@initPath, newest];
 		Close@f,
 		Print@"Dry run, init.m not changed."
 	];
-	
+
 	m = "Mathematica's init.m has been updated!\nRestart Mathematica to apply the changes.";
 	If[OptionValue[FromInitFile]
 		MessageDialog @ m;,
@@ -157,12 +157,12 @@ intInterval[expr_, {xmin_, xmax_}] := Block[{symbols, symbol},
 	intInterval[expr, {symbol, xmin, xmax}]
 ];
 
-plotIntersect[f1_, f2_, o_, options_] := Block[{x, solution}, 
+plotIntersect[f1_, f2_, o_, options_] := Block[{x, solution},
 	x = o[[1]];
 	solution = Solve[y == f1 && y == f2, {x, y}];
 	Show[Plot[{f1, f2}, o], ListPlot[Transpose[{x /. solution, y /. solution}], PlotStyle -> {Red, PointSize[0.0125]}], options]
 ];
-	
+
 plotIntersect[f1_, f2_, o_] := plotIntersect[f1, f2, o, {}];
 
 plotDefiniteIntegral[expr_, {x_, xmin_, xmax_}, margin_] := Show@{
@@ -181,12 +181,12 @@ Options[fitPlot] = Table[x -> True, {x, fitPlotOptionNames}] ~Join~ Options[Plot
 fitPlot[data_, expr_, pars_, vars_, options:OptionsPattern[]] := Block[{nonlinearModelFitOptionNames, plotOptionNames, nonlinearModelFitOptions, plotOptions, fit, params, col1, plotRange, xmin, xmax, labelOptions, labels, R, otherOptions, fitted},
 	Assert[Length@Dimensions[data] >= 2 && Dimensions[data][[2]] == 2];
 	Assert[Head@vars == Symbol];
-	
+
 	nonlinearModelFitOptionNames = First /@ Options[NonlinearModelFit];
 	plotOptionNames = Complement[First /@ Options[Plot], nonlinearModelFitOptionNames];
-	
+
 	{nonlinearModelFitOptions, plotOptions} = Table[Cases[{options}, HoldPattern @ Evaluate[Alternatives @@ l -> _]], {l, {nonlinearModelFitOptionNames, plotOptionNames}}];
-	
+
 	fit = NonlinearModelFit[data, expr, pars, vars, Evaluate[Sequence @@ nonlinearModelFitOptions]];
 	params = fit["BestFitParameters"];
 	col1 = data[[All,1]];
@@ -220,7 +220,7 @@ plotWithPoints[expr_, {x_, xmin_, xmax_}, xs_, options:OptionsPattern[Plot]] := 
 	options
 ];
 
-plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b}, 
+plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 	Manipulate[
 		GraphicsRow[{
 			Plot3D[eq, Evaluate@param1, Evaluate@param2, Mesh -> {{a}, {b}}],
@@ -228,7 +228,7 @@ plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 			Plot[eq /. param1[[1]] -> a, Evaluate@param2, AxesLabel -> {"y", "z"}]
 		}, ImageSize -> Full],
 	{{a, Mean[param1[[2 ;; 3]]], "x"}, param1[[2]], param1[[3]]},
-	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]	
+	{{b, Mean[param2[[2 ;; 3]]], "y"}, param2[[2]], param2[[3]]}]
 ];
 
 plotVectors[v_?MatrixQ, o_List, opt:OptionsPattern[Show]] := Module[{n = Dimensions[v][[2]], graphics},
@@ -288,31 +288,31 @@ chemicalTable[formula_] := Module[{chemicals, properties},
 	}, True]
 ];
 
-$thermodynamicData = {{"Ag(s)", 0, 42.55, 0}, {"Ag+(aq)", 105.79, 73.45, 77.16}, 
- {"AgCl(s)", -127.01, 96.25, -109.86}, {"AgI(s)", -61.87, 115.83, -66.22}, 
- {"Ba(OH)2\[CenterDot]H2O(s)", -3342.2, 427, -2792.2}, {"BaCl2\[CenterDot]2H2O(s)", -1456.9, 202., 
-  -1293.2}, {"C(s,grafit)", 0, 5.74, 0}, {"C(s,diamant)", 1.895, 2.377, 2.832}, 
- {"CH4(g)", -74.6, 186.3, -50.5}, {"C2H4(g)", 52.3, 219.3, 68.27}, 
- {"C7H16(l)", -224.2, 326.1, 1.89}, {"CH3OH(l)", -239.2, 126.8, -166.6}, 
- {"CH3CH2OH(l)", -277.6, 160.7, -174.8}, {"CO(g)", -110.53, 197.66, -137.25}, 
- {"CO2(g)", -393.51, 213.785, -394.4}, {"CaCO3(s)", -1206.92, 92.9, -1128.84}, 
- {"CaO(s)", -634.92, 38.1, -603.3}, {"Cl-(aq)", -167.08, 56.6, -131.2}, 
- {"CrO4--(aq)", -881.15, 50.2, -727.8}, {"H2(g)", 0, 130.68, 0}, 
- {"H+(aq)", 0, 0, 0}, {"H3O+(aq)", -285.83, 69.95, -237.13}, 
- {"H2O(l)", -285.83, 69.95, -237.13}, {"H2O(g)", -241.8, 188.8, -228.6}, 
- {"HCl(g)", -92.3, 186.9, -95.3}, {"HI(g)", 25.94, 206.44, 1.32}, 
- {"I2(s)", 0, 116.14, 0}, {"I-(aq)", -56.78, 106.45, -51.6}, 
- {"N2(g)", 0, 191.61, 0}, {"NH3(g)", -45.5, 192.8, -16.4}, 
- {"NH4-(aq)", -132.4, 113.4, -79.3}, {"NH4Cl(s)", -314.6, 94.6, -202.9}, 
+$thermodynamicData = {{"Ag(s)", 0, 42.55, 0}, {"Ag+(aq)", 105.79, 73.45, 77.16},
+ {"AgCl(s)", -127.01, 96.25, -109.86}, {"AgI(s)", -61.87, 115.83, -66.22},
+ {"Ba(OH)2\[CenterDot]H2O(s)", -3342.2, 427, -2792.2}, {"BaCl2\[CenterDot]2H2O(s)", -1456.9, 202.,
+  -1293.2}, {"C(s,grafit)", 0, 5.74, 0}, {"C(s,diamant)", 1.895, 2.377, 2.832},
+ {"CH4(g)", -74.6, 186.3, -50.5}, {"C2H4(g)", 52.3, 219.3, 68.27},
+ {"C7H16(l)", -224.2, 326.1, 1.89}, {"CH3OH(l)", -239.2, 126.8, -166.6},
+ {"CH3CH2OH(l)", -277.6, 160.7, -174.8}, {"CO(g)", -110.53, 197.66, -137.25},
+ {"CO2(g)", -393.51, 213.785, -394.4}, {"CaCO3(s)", -1206.92, 92.9, -1128.84},
+ {"CaO(s)", -634.92, 38.1, -603.3}, {"Cl-(aq)", -167.08, 56.6, -131.2},
+ {"CrO4--(aq)", -881.15, 50.2, -727.8}, {"H2(g)", 0, 130.68, 0},
+ {"H+(aq)", 0, 0, 0}, {"H3O+(aq)", -285.83, 69.95, -237.13},
+ {"H2O(l)", -285.83, 69.95, -237.13}, {"H2O(g)", -241.8, 188.8, -228.6},
+ {"HCl(g)", -92.3, 186.9, -95.3}, {"HI(g)", 25.94, 206.44, 1.32},
+ {"I2(s)", 0, 116.14, 0}, {"I-(aq)", -56.78, 106.45, -51.6},
+ {"N2(g)", 0, 191.61, 0}, {"NH3(g)", -45.5, 192.8, -16.4},
+ {"NH4-(aq)", -132.4, 113.4, -79.3}, {"NH4Cl(s)", -314.6, 94.6, -202.9},
  {"NH4NO3(s)", -365.3, 151.1, -183.9}, {"NO(g)", 91.2, 210.8, 87.6}, {"NO2(g)", 33.1, 240.1, 51.3},
- {"N2O4(g)", 11.4, 304.3, 99.8}, {"NO3-(aq)", -207, 146.4, -111.3}, 
- {"Na(s)", 0, 51.3, 0}, {"Na+(aq)", -240.34, 58.45, -261.9}, 
- {"NaCl(s)", -411.2, 72.1, -384.1}, {"O2(g)", 0, 205.15, 0}, 
- {"OH-(aq)", -230.01, -10.9, -157.2}, {"SO2(g)", -296.81, 248.23, -300.1}, 
+ {"N2O4(g)", 11.4, 304.3, 99.8}, {"NO3-(aq)", -207, 146.4, -111.3},
+ {"Na(s)", 0, 51.3, 0}, {"Na+(aq)", -240.34, 58.45, -261.9},
+ {"NaCl(s)", -411.2, 72.1, -384.1}, {"O2(g)", 0, 205.15, 0},
+ {"OH-(aq)", -230.01, -10.9, -157.2}, {"SO2(g)", -296.81, 248.23, -300.1},
  {"SO3(g)", -395.72, 256.83, -371.03}};
 
-deltaThermo[reactants_ -> products_, i_Integer, rule_List] := 
-	Quantity[(removeSubscript //@ products /. rule) - (removeSubscript //@ reactants /. rule), 
+deltaThermo[reactants_ -> products_, i_Integer, rule_List] :=
+	Quantity[(removeSubscript //@ products /. rule) - (removeSubscript //@ reactants /. rule),
 		Evaluate@If[i == 2, "Joules"/("Moles"*"Kelvins"), "Kilojoules"/"Moles"]];
 deltaThermo[r_Rule, i_Integer] := deltaThermo[r, i, Rule @@@ $thermodynamicData[[All, {1, i + 1}]]];
 deltaH[r_Rule] := deltaThermo[r, 1];
@@ -327,7 +327,7 @@ $mySIPrefixes={"Y"->"Yotta","Z"->"Zetta","E"->"Exa","P"->"Peta","T"->"Tera","G"-
 $unitAbbreviations={"\[Degree]"->"angularDegrees","\[Degree]C"|"℃"->"degreesCelsius","\[Degree]F"|"℉"->"degreesFahrenheit","\[CapitalOmega]"->"ohms","A"->"amperes","Bq"->"becquerels","C"->"coulombs","Da"|"u"->"daltons","F"->"farads","Gy"->"grays","H"->"henries","Hz"->"hertz","J"->"joules","K"->"kelvins","L"->"liters","ly"->"lightYears","M"->"molar","N"->"newtons","Pa"->"pascals","pc"->"parsecs","S"->"siemens","Sv"->"sieverts","T"->"teslas","V"->"volts","W"->"watts","Wb"->"webers","a"->"julianYears","atm"->"atmospheres","au"->"astronomicalUnit","bar"->"bars","cd"->"candelas","d"->"days","eV"->"electronvolts","g"->"grams","h"->"hours","kat"->"katals","lm"->"lumens","lx"->"lux","m"->"meters","min"->"minutes","mol"->"moles","rad"->"radians","s"->"seconds","sr"->"steradians"};
 $constantAbbreviations={"\[CurlyEpsilon]0"|"\[Epsilon]0"->"electricConstant","\[Mu]0"->"magneticConstant","\[Sigma]"->"stefanBoltzmannConstant","b"->"WienWavelengthDisplacementLawConstant","c"->"speedOfLight","e"->"elementaryCharge","G"->"gravitationalConstant","h"->"planckConstant","k"->"boltzmannConstant","me"->"electronMass","NA"->"avogadroConstant","R"->"molarGasConstant"};
 
-firstDropWhile[list_, cond_] := Module[{l}, 
+firstDropWhile[list_, cond_] := Module[{l},
 	l = LengthWhile[list, cond];
 	If[l == Length[list],
 		Null,
@@ -353,7 +353,7 @@ knownUnitAbbreviationQ[str_String] := unitFullName[str] =!= Null;
 constantFullName[str_String] := fullName[str, $constantAbbreviations];
 knownConstantAbbreviationQ[str_String] := constantFullName[str] =!= Null;
 
-fullUnit[u_] := Module[{}, 
+fullUnit[u_] := Module[{},
 	Evaluate[u /. {s_String?LetterQ :> fullName[s, $unitAbbreviations ~ Join ~ $constantAbbreviations], CenterDot -> Times}]
 ];
 
@@ -365,9 +365,9 @@ unitConvert[q_, u_] := UnitConvert[q, fullUnit@u];
 CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
 
 CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliases], {
-	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"}, 
-		"QuantityUnit", Tooltip -> "Unit Template", 
-		DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
+	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"},
+		"QuantityUnit", Tooltip -> "Unit Template",
+		DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
 		InterpretationFunction -> (With[{unit = #2 /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
 			(*Print[unit];*)
 			If[KnownUnitQ@@MakeExpression@unit,
@@ -376,9 +376,9 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 			]
 		] &)
 	],
-	"const" -> TemplateBox[{"\[SelectionPlaceholder]"}, 
-		"Constant", Tooltip -> "Constant Template", 
-		DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &), 
+	"const" -> TemplateBox[{"\[SelectionPlaceholder]"},
+		"Constant", Tooltip -> "Constant Template",
+		DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
 		InterpretationFunction -> (With[{const = # /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
 			(*Print[const];*)
 			If[KnownUnitQ@@MakeExpression@const,
@@ -466,7 +466,7 @@ walkRowReduce[matrix_?MatrixQ] := Module[{copy, sorted, rows, cols, r, c, first,
 			];
 		];
 	];
-	
+
 	RowReduce@matrix
 ];
 
@@ -485,7 +485,7 @@ Export[name <> ".gif",
 
 numPlot[ss_,{s_,e_},ee_]:=numPlot[{{ss,{s,e},ee}}];
 numPlot[ints:{{_String,{_?NumericQ,_?NumericQ},_String}..}]:=Module[{i=0,c=ColorData[1,"ColorList"]},With[{min=Min[ints[[All,2,1]]],max=Max[ints[[All,2,2]]]},Graphics[Table[With[{ss=int[[1]],s=int[[2,1]],e=int[[2,2]],ee=int[[3]]},{c[[++i+1]],Thickness[.01],Text[Style[ss,Large,c[[i+1]],Bold],{s,i}],Text[Style[ee,Large,c[[i+1]],Bold],{e,i}],Line[{{s,i},{e,i}}]}],{int,ints}],Axes->{True,False},AxesStyle->Directive[Thin,Blue,12],PlotRange->{{0,max+.2 Abs@(min-max)},{0,++i}},AspectRatio->.2]]];
- 
+
 SetAttributes[traceViewCompact, {HoldAllComplete}];
 traceViewCompact[expr_] :=
 Module[{steps = {}, stack = {}, pre, post, show, default = False},
@@ -511,7 +511,7 @@ Module[{steps = {}, stack = {}, pre, post, show, default = False},
 					Spacings -> Automatic, Background -> {{Hue[.65, .1, 1]}, None}]];
 		TraceScan[pre, expr, ___, post];
 		Deploy@
-		Column@{Opener@Dynamic@default, 
+		Column@{Opener@Dynamic@default,
 		Dynamic@Pane[First@steps, ImageSize -> 10000]}];
 
 Format[d[f_, x_], TraditionalForm] := Module[{paren, boxes},
@@ -550,20 +550,20 @@ $dRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule"
               "Quotient Rule", "Product Rule", "Inverse Function Rule", "Chain Rule"};
 
 displayStart[expr_] := CellPrint[
-	Cell[BoxData[MakeBoxes[HoldForm[expr], TraditionalForm]], "Output", 
-		Evaluatable -> False, CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+	Cell[BoxData[MakeBoxes[HoldForm[expr], TraditionalForm]], "Output",
+		Evaluatable -> False, CellMargins -> {{Inherited, Inherited}, {10, 10}},
 		CellFrame -> False, CellEditDuplicate -> False]];
 
 displayDerivative[expr_, k_Integer] := CellPrint[
-	Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
-		MakeBoxes[HoldForm[expr], TraditionalForm]}], "Differentation: " <> $dRuleNames[[k]], 
-		LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
-	CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+	Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ",
+		MakeBoxes[HoldForm[expr], TraditionalForm]}], "Differentation: " <> $dRuleNames[[k]],
+		LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False,
+	CellMargins -> {{Inherited, Inherited}, {10, 10}},
 	CellFrame -> False, CellEditDuplicate -> False]];
 
 walkD::differentationError = "Failed to differentiate expression!";
 
-walkD[f_, x_] := Module[{derivative, oldderivative, k}, 
+walkD[f_, x_] := Module[{derivative, oldderivative, k},
 	derivative = d[f, x]; displayStart[derivative];
 	While[! FreeQ[derivative, d],
 		oldderivative = derivative; k = 0;
@@ -601,30 +601,57 @@ intLinearityRule = {int[f_ + g_, x_] :> int[f, x] + int[g, x],
 
 intPowerRule = {int[x_, x_] :> x^2 / 2, int[1/x_, x_] :> Log[x], int[(x_)^(a_), x_] :> x^(a + 1)/(a + 1) /; FreeQ[a, x]};
 
+intChainRule = int[a_ fd_[g_] gd_, x_] :> a (Integrate[fd[u], u] /. u -> g) /; D[g, x] == gd && FreeQ[a, x];
+
 intSubstitutionRule = {
-						int[(f_)^(a_), x_] :> ((Integrate[u^a, u] / d[f, x]) /. u -> f) /; FreeQ[a, x] && FreeQ[D[f, x], x],
-						int[(f_)^(a_) g_, x_] :> ((Integrate[u^a, u] / d[f, x]) * g /. u -> f) /; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
-						int[(a_)^(f_), x_] :> (a ^ f)/(d[f, x] * Log[a]) /; FreeQ[a, x] && FreeQ[D[f, x], x],
-						int[(a_)^(f_) g_, x_] :> (a ^ f)/(d[f, x] * Log[a]) * g /; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
-						int[(f_)[g_], x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] /; FreeQ[D[g, x], x],
-						int[(f_)[g_] h_, x_] :> (Integrate[f[u], u] /. u -> g) / d[g, x] * h /; FreeQ[FullSimplify[D[g, x] / h], x]
+						int[(f_)^(a_), x_] :> {((Integrate[u^a, u] / d[f, x]) /. u -> f),
+								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+							}
+							/; FreeQ[a, x] && FreeQ[D[f, x], x],
+
+						int[(f_)^(a_) g_, x_] :> {((Integrate[u^a, u] / d[f, x]) * g /. u -> f),
+								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+							}
+							/; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
+
+						int[(a_)^(f_), x_] :> {(a ^ f)/(d[f, x] * Log[a]),
+								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+							}
+							/; FreeQ[a, x] && FreeQ[D[f, x], x],
+
+						int[(a_)^(f_) g_, x_] :> {(a ^ f)/(d[f, x] * Log[a]) * g,
+								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+							}
+							/; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
+
+						int[(f_)[g_], x_] :> {(Integrate[f[u], u] /. u -> g) / d[g, x],
+								"f(" <> ToString @ x <> ") = " <> ToString @ f <> "\ng(" <> ToString @ x <>") = " <> ToString @ g <> "\ng'(" <> ToString @ x <> ") = " <> ToString @ D[g, x]
+							}
+							/; FreeQ[D[g, x], x],
+
+						int[(f_)[g_] h_, x_] :> {(Integrate[f[u], u] /. u -> g) / d[g, x] * h,
+								"f(" <> ToString @ x <> ") = " <> ToString @ f[u] <> "\nu = g(" <> ToString @ x <>") = " <> ToString @ g <> "\ng'(" <> ToString @ x <> ") = " <> ToString @ D[g, x]
+							}
+							/; FreeQ[FullSimplify[D[g, x] / h], x]
 					};
+
+intIntegrationByParts = int[f_ gd_, x_] :> f * g - int[d[f, x] * g, x] /; D[g, x] == gd;
 
 intProductRule = int[f_ g_, x_] :> int[f, x] g - int[int[f, x] * d[g, x], x];
 
 $intRuleNames = {"Specific Rules", "Constant Rule", "Linearity Rule", "Power Rule", "Substitution Rule", "Product Rule"};
 
-displayIntegral[expr_, k_Integer] := CellPrint[
-  Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ", 
-       MakeBoxes[HoldForm[expr], TraditionalForm]}], "Integration: " <> $intRuleNames[[k]], 
-     LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False, 
-   CellMargins -> {{Inherited, Inherited}, {10, 10}}, 
+displayIntegral[expr_, k_Integer, extrainfo_String] := CellPrint[
+  Cell[BoxData[TooltipBox[RowBox[{InterpretationBox["=", Sequence[]], "  ",
+       MakeBoxes[HoldForm[expr], TraditionalForm]}], "Integration: " <> $intRuleNames[[k]] <> If[extrainfo == "", "", "\n" <> extrainfo],
+     LabelStyle -> "TextStyling"]], "Output", Evaluatable -> False,
+   CellMargins -> {{Inherited, Inherited}, {10, 10}},
    CellFrame -> False, CellEditDuplicate -> False]];
 
 walkInt::integrationError = "Failed to integrate expression!";
 walkInt::differentationError = "Failed to differentiate expression!";
 
-walkInt[f_, x_] := Module[{integral, oldintegral, k, leafcounts, ruleused},
+walkInt[f_, x_] := Module[{integral, oldintegral, extrainfo, k, leafcounts, ruleused},
 	integral = int[f, x]; displayStart[integral];
 	leafcounts = {};
 	ruleused = "";
@@ -636,6 +663,7 @@ walkInt[f_, x_] := Module[{integral, oldintegral, k, leafcounts, ruleused},
 				Return[Integrate[f, x]];
 			];
 		];
+		extrainfo = "";
 		oldintegral = integral; k = 0;
 		While[oldintegral == integral,
 			k++;
@@ -643,10 +671,14 @@ walkInt[f_, x_] := Module[{integral, oldintegral, k, leafcounts, ruleused},
 				Message[walkInt::integrationError];
 				Return[Integrate[f, x]];
 			];
-			integral = integral /. ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]]
+			integral = integral /. ToExpression["int" <> StringReplace[$intRuleNames[[k]], " " -> ""]];
+			If[Head @ integral === List,
+				extrainfo = Last @ integral;
+				integral = First @ integral;
+			];
 		];
 		ruleused = $intRuleNames[[k]];
-		displayIntegral[integral, k];
+		displayIntegral[integral, k, extrainfo];
 		While[! FreeQ[integral, d],
 			oldintegral = integral; k = 0;
 			While[oldintegral == integral,
@@ -672,5 +704,5 @@ Notation`AutoLoadNotationPalette = False;
 Needs["Notation`"];
 Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
 Symbolize[ParsedBoxWrapper[OverscriptBox["_","_"]]];
-Notation[ParsedBoxWrapper[\(\(\[LeftBracketingBar] expr_ \[RightBracketingBar]\)\_a_\%b_\)] \[DoubleLongLeftRightArrow] 
+Notation[ParsedBoxWrapper[\(\(\[LeftBracketingBar] expr_ \[RightBracketingBar]\)\_a_\%b_\)] \[DoubleLongLeftRightArrow]
    ParsedBoxWrapper[\(intInterval[\(expr_, \({a_, b_}\)\)]\)]]
