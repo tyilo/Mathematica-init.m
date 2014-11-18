@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-11-17 00:06 *)
+(* Timestamp: 2014-11-18 18:45 *)
 
 (** User Mathematica initialization file **)
 
@@ -603,34 +603,36 @@ intPowerRule = {int[x_, x_] :> x^2 / 2, int[1/x_, x_] :> Log[x], int[(x_)^(a_), 
 
 intChainRule = int[a_ fd_[g_] gd_, x_] :> a (Integrate[fd[u], u] /. u -> g) /; D[g, x] == gd && FreeQ[a, x];
 
+subst[f_, g_, x_] := "f(u) = " <> ToString @ f[u] <> "\nu = g(" <> ToString @ x <> ") = " ToString @ g <> "\ng'(" <> ToString @ x <> ") = " ToString @ D[g, x]
+
 intSubstitutionRule = {
 						int[(f_)^(a_), x_] :> {((Integrate[u^a, u] / d[f, x]) /. u -> f),
-								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+								subst[#^a &, f, x]
 							}
 							/; FreeQ[a, x] && FreeQ[D[f, x], x],
 
 						int[(f_)^(a_) g_, x_] :> {((Integrate[u^a, u] / d[f, x]) * g /. u -> f),
-								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+								subst[#^a &, f, x]
 							}
 							/; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
 
 						int[(a_)^(f_), x_] :> {(a ^ f)/(d[f, x] * Log[a]),
-								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+								subst[a^# &, f, x]
 							}
 							/; FreeQ[a, x] && FreeQ[D[f, x], x],
 
 						int[(a_)^(f_) g_, x_] :> {(a ^ f)/(d[f, x] * Log[a]) * g,
-								"u = " <> ToString @ f <> "\ndu = " <> ToString @ D[f, x] <> " d" <> ToString @ x
+								subst[a^# &, f, x]
 							}
 							/; FreeQ[a, x] && FreeQ[FullSimplify[D[f, x] / g], x],
 
 						int[(f_)[g_], x_] :> {(Integrate[f[u], u] /. u -> g) / d[g, x],
-								"f(" <> ToString @ x <> ") = " <> ToString @ f <> "\ng(" <> ToString @ x <>") = " <> ToString @ g <> "\ng'(" <> ToString @ x <> ") = " <> ToString @ D[g, x]
+								subst[f, g, x]
 							}
 							/; FreeQ[D[g, x], x],
 
 						int[(f_)[g_] h_, x_] :> {(Integrate[f[u], u] /. u -> g) / d[g, x] * h,
-								"f(" <> ToString @ x <> ") = " <> ToString @ f[u] <> "\nu = g(" <> ToString @ x <>") = " <> ToString @ g <> "\ng'(" <> ToString @ x <> ") = " <> ToString @ D[g, x]
+								subst[f, g, x]
 							}
 							/; FreeQ[FullSimplify[D[g, x] / h], x]
 					};
