@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-11-18 18:45 *)
+(* Timestamp: 2014-11-18 18:46 *)
 
 (** User Mathematica initialization file **)
 
@@ -468,6 +468,38 @@ walkRowReduce[matrix_?MatrixQ] := Module[{copy, sorted, rows, cols, r, c, first,
 	];
 
 	RowReduce@matrix
+];
+
+criticalPoints[f_, {x_ ,y_ }] := Module[{sol, fxx, d, pts, d1, fxx1, table},
+	sol = Solve[D[f, x] == 0 && D[f, y] == 0, {x, y}, Reals];
+	If[Length@sol == 0,
+		Return["No critical points"];
+	];
+	fxx = D[f, {x, 2}];
+	d = fxx * D[f, {y, 2}] - D[f, x, y] ^ 2;
+	pts = {x, y, f} /. sol;
+	table = Table[
+		{d1, fxx1} = {d, fxx} /. {x -> pts[[n,1]], y -> pts[[n,2]]};
+		{pts[[n]], d1, fxx1,
+			Which[d1 > 0 && fxx1 > 0, "Minimum",
+			      d1 > 0 && fxx1 < 0, "Maximum",
+				  d1 < 0, "Saddle",
+				  d1 == 0, "Unknown"
+			]
+		},
+		{n, Length@pts}
+	];
+	Grid[Prepend[table, {"Point", "D(x, y)", "\!\(\*SubscriptBox[\(f\), \(xx\)]\)(x,y)", "Type"}], Frame -> All]
+];
+
+truthTable[expr_, vars_List] := Module[{n, d, table},
+	n = Length@vars;
+	table = Table[
+		d = PadLeft[IntegerDigits[x, 2], n];
+		Append[d, Boole @ expr /. Thread[vars -> ((# != 0) & /@ d)]],
+		{x, 0, 2^n - 1}
+	];
+	Grid[Prepend[table, Append[vars, expr]], Frame -> All]
 ];
 
 (* Borrowed definitions *)
