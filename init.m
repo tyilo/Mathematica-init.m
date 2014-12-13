@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-12-09 02:56 *)
+(* Timestamp: 2014-12-13 03:18 *)
 
 (** User Mathematica initialization file **)
 
@@ -501,6 +501,18 @@ truthTable[expr_, vars_List] := Module[{n, d, table},
 	];
 	Grid[Prepend[table, Append[vars, expr]], Frame -> All]
 ];
+
+maxBigO[l_, n_] := Switch[Length@l,
+	1, First@l,
+	2, If[Limit[Abs[First@l / Last@l], n -> Infinity] === 0, Last@l, First@l],
+	_, maxBigO[{maxBigO[Take[l, 2], n], maxBigO[Drop[l, 2], n]}, n]
+];
+bigOSimplify[expr_, n_] := 1 /; FreeQ[expr, n];
+bigOSimplify[expr_Plus, n_] := bigOSimplify[maxBigO[expr, n], n];
+bigOSimplify[expr_Times, n_] := (If[FreeQ[#, n], 1, bigOSimplify[#, n]] &) /@ expr;
+bigOSimplify[a_Plus ^ b_, n_] := maxBigO[a, n] ^ b;
+bigOSimplify[expr_, n_] := bigOSimplify[FunctionExpand@expr, n] /; expr =!= FunctionExpand@expr;
+bigOSimplify[expr_, n_] := expr;
 
 (* Borrowed definitions *)
 
