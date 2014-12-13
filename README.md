@@ -4,10 +4,7 @@ Mathematica-init.m
 Installing
 -------------
 
-Place in `init.m` in `ToFileName[{$UserBaseDirectory,"Kernel"},"init.m"]` and restart Mathematica.
-
-Or you could just run this in Mathematica:
-
+Run this in Mathematica:
 ```
 newest = URLFetch@"https://raw.github.com/Tyilo/Mathematica-init.m/master/init.m";
 initPath = ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
@@ -18,7 +15,7 @@ Close@f;
 Updating
 -------------
 
-Once you have the init file installed, you can call the function `updateInitFile[]` to update the `init` file to the latest version.
+Once you have the init file installed, you can call the function `updateInitFile[]` to update the `init.m` file to the latest version.
 
 Changes to preferences
 --------------------------
