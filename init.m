@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-12-13 03:18 *)
+(* Timestamp: 2014-12-20 14:41 *)
 
 (** User Mathematica initialization file **)
 
@@ -399,7 +399,9 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 		DisplayFunction -> (RowBox[{
 			StyleBox["[", SpanMaxSize -> Infinity], #1, StyleBox["]", SpanMaxSize -> Infinity]
 		}] &)],
-	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"]
+	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"],
+	"abs" -> RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}],
+	"norm" -> RowBox[{"\[LeftDoubleBracketingBar]", "\[SelectionPlaceholder]", "\[RightDoubleBracketingBar]"}]
 }];
 
 pow00eq1[x_, y_] := If[x == 0 && y == 0, 1, x ^ y];
