@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2014-12-20 14:41 *)
+(* Timestamp: 2015-11-11 00:09 *)
 
 (** User Mathematica initialization file **)
 
@@ -9,6 +9,7 @@ If[$VersionNumber < $minVersion,
 	MessageDialog["You need at least Mathematica v" <> ToString @ $minVersion <>
 		" to use this init.m file.\nYou're using Mathematica v" <> First @ StringSplit[$Version, " "] <> "."]
 ];
+
 
 (* Needed to make function appear in the auto-complete prompt *)
 Begin["System`"];
@@ -21,6 +22,7 @@ Protect[WolframAlpha];
 
 (* My definitions *)
 
+(*
 Module[{t},
 	t = CreateScheduledTask[
 		"initFileScheduledTask";
@@ -35,6 +37,8 @@ Module[{t},
 	];
 	StartScheduledTask @ t;
 ];
+*)
+
 
 updateInitFile::networkError = "Failed to retrieve the latest init.m version from github.";
 Options[updateInitFile] := {DryRun -> False, FromInitFile -> False};
@@ -87,6 +91,7 @@ Module[{path, systemPath, userPath},
 	];
 ];
 
+
 reloadInitFile[] := Import@ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 
 fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
@@ -134,6 +139,7 @@ MinusPlus[{a1_, a2_}, {b1_, b2_}] := Module[{r},
 MinusPlus[{a1_, a2_}, b_] := MinusPlus[{a1, a2}, {b, b}];
 MinusPlus[a_, {b1_, b2_}] := MinusPlus[{a, a}, {b1, b2}];
 MinusPlus[a_, b_] := MinusPlus[{a, a}, {b, b}];
+
 
 InfixNotation[ParsedBoxWrapper["\[CirclePlus]"], BitXor];
 
@@ -361,6 +367,7 @@ quantity[u_] := Quantity[fullUnit@u];
 quantity[m_, u_] := Quantity[m, fullUnit@u];
 unitConvert[q_] := UnitConvert[q];
 unitConvert[q_, u_] := UnitConvert[q, fullUnit@u];
+
 
 CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
 
@@ -744,6 +751,7 @@ walkInt[f_, x_] := Module[{integral, oldintegral, extrainfo, k, leafcounts, rule
 ];
 
 End[];
+
 
 (*
   Make it possible to work with subscripted and overscripted variables.
