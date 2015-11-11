@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2015-11-11 00:09 *)
+(* Timestamp: 2015-11-11 00:32 *)
 
 (** User Mathematica initialization file **)
 
@@ -400,6 +400,13 @@ CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliase
 			StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
 		}] &),
 		InterpretationFunction -> (RowBox[{"Flatten", "[", #, "]"}]&)
+	],
+	"binom" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
+		"Binomial",
+		DisplayFunction -> (RowBox[{
+			StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
+		}] &),
+		InterpretationFunction -> (RowBox[{"Binomial", "@@", "Flatten", "[", #1, "]"}]&)
 	],
 	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]", "\[Placeholder]"}, {"\[Placeholder]", "\[Placeholder]"}}]},
 		"Matrix",
