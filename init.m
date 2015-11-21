@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2015-11-11 00:32 *)
+(* Timestamp: 2015-11-21 18:30 *)
 
 (** User Mathematica initialization file **)
 
@@ -22,7 +22,7 @@ Protect[WolframAlpha];
 
 (* My definitions *)
 
-(*
+(* Hangs Mathematica 10.1
 Module[{t},
 	t = CreateScheduledTask[
 		"initFileScheduledTask";
@@ -226,6 +226,7 @@ plotWithPoints[expr_, {x_, xmin_, xmax_}, xs_, options:OptionsPattern[Plot]] := 
 	options
 ];
 
+
 plot3DCrossSection[eq_, param1_, param2_] := Module[{a, b},
 	Manipulate[
 		GraphicsRow[{
@@ -368,55 +369,56 @@ quantity[m_, u_] := Quantity[m, fullUnit@u];
 unitConvert[q_] := UnitConvert[q];
 unitConvert[q_, u_] := UnitConvert[q, fullUnit@u];
 
+If[$FrontEnd =!= Null,
+	CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
 
-CurrentValue[$FrontEnd, InputAliases] = DeleteCases[CurrentValue[$FrontEnd, InputAliases], "qu"|"const"|"dintintt" -> _];
-
-CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliases], {
-	"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"},
-		"QuantityUnit", Tooltip -> "Unit Template",
-		DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
-		InterpretationFunction -> (With[{unit = #2 /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
-			(*Print[unit];*)
-			If[KnownUnitQ@@MakeExpression@unit,
-				RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
-				RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
-			]
-		] &)
-	],
-	"const" -> TemplateBox[{"\[SelectionPlaceholder]"},
-		"Constant", Tooltip -> "Constant Template",
-		DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
-		InterpretationFunction -> (With[{const = # /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
-			(*Print[const];*)
-			If[KnownUnitQ@@MakeExpression@const,
-				RowBox[{"Quantity", "[", 1, ",", const, "]"}],
-				RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
-			]
-		] &)
-	],
-	"vect" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
-		"Vector",
-		DisplayFunction -> (RowBox[{
-			StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
-		}] &),
-		InterpretationFunction -> (RowBox[{"Flatten", "[", #, "]"}]&)
-	],
-	"binom" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
-		"Binomial",
-		DisplayFunction -> (RowBox[{
-			StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
-		}] &),
-		InterpretationFunction -> (RowBox[{"Binomial", "@@", "Flatten", "[", #1, "]"}]&)
-	],
-	"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]", "\[Placeholder]"}, {"\[Placeholder]", "\[Placeholder]"}}]},
-		"Matrix",
-		DisplayFunction -> (RowBox[{
-			StyleBox["[", SpanMaxSize -> Infinity], #1, StyleBox["]", SpanMaxSize -> Infinity]
-		}] &)],
-	"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"],
-	"abs" -> RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}],
-	"norm" -> RowBox[{"\[LeftDoubleBracketingBar]", "\[SelectionPlaceholder]", "\[RightDoubleBracketingBar]"}]
-}];
+	CurrentValue[$FrontEnd, InputAliases] = Join[CurrentValue[$FrontEnd, InputAliases], {
+		"qu" -> TemplateBox[{"\[SelectionPlaceholder]", "\[Placeholder]"},
+			"QuantityUnit", Tooltip -> "Unit Template",
+			DisplayFunction -> (PanelBox[RowBox[{#1, StyleBox[#2, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
+			InterpretationFunction -> (With[{unit = #2 /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownUnitAbbreviationQ :> "\""~~(unitFullName[s])~~"\"" /. s_String :> (s /. "\[CenterDot]" -> "*")},
+				(*Print[unit];*)
+				If[KnownUnitQ@@MakeExpression@unit,
+					RowBox[{"Quantity", "[", #1, ",", unit, "]"}],
+					RowBox[{"Quantity", "[", #1, ",", "\""~~StringTake[ToString[MakeExpression@#2, InputForm], {14, -2}]~~"\"", "]"}]
+				]
+			] &)
+		],
+		"const" -> TemplateBox[{"\[SelectionPlaceholder]"},
+			"Constant", Tooltip -> "Constant Template",
+			DisplayFunction -> (PanelBox[RowBox[{StyleBox[#, "QuantityUnitTraditionalLabel"]}], FrameMargins -> 2] &),
+			InterpretationFunction -> (With[{const = # /. SubscriptBox[a_, b_] :> ToString[a] ~~ ToString[b] /. s_String?knownConstantAbbreviationQ :> "\""~~(constantFullName[s])~~"\""},
+				(*Print[const];*)
+				If[KnownUnitQ@@MakeExpression@const,
+					RowBox[{"Quantity", "[", 1, ",", const, "]"}],
+					RowBox[{"Quantity", "[", 1, ",", "\""~~StringTake[ToString[MakeExpression@#, InputForm], {14, -2}]~~"\"", "]"}]
+				]
+			] &)
+		],
+		"vect" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
+			"Vector",
+			DisplayFunction -> (RowBox[{
+				StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
+			}] &),
+			InterpretationFunction -> (RowBox[{"Flatten", "[", #, "]"}]&)
+		],
+		"binom" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]},
+			"Binomial",
+			DisplayFunction -> (RowBox[{
+				StyleBox["(", SpanMaxSize -> Infinity], #1, StyleBox[")", SpanMaxSize -> Infinity]
+			}] &),
+			InterpretationFunction -> (RowBox[{"Binomial", "@@", "Flatten", "[", #1, "]"}]&)
+		],
+		"mat" -> TemplateBox[{GridBox[{{"\[SelectionPlaceholder]", "\[Placeholder]"}, {"\[Placeholder]", "\[Placeholder]"}}]},
+			"Matrix",
+			DisplayFunction -> (RowBox[{
+				StyleBox["[", SpanMaxSize -> Infinity], #1, StyleBox["]", SpanMaxSize -> Infinity]
+			}] &)],
+		"dintintt" -> SubsuperscriptBox[RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}], "\[Placeholder]", "\[Placeholder]"],
+		"abs" -> RowBox[{"\[LeftBracketingBar]", "\[SelectionPlaceholder]", "\[RightBracketingBar]"}],
+		"norm" -> RowBox[{"\[LeftDoubleBracketingBar]", "\[SelectionPlaceholder]", "\[RightDoubleBracketingBar]"}]
+	}];
+];
 
 pow00eq1[x_, y_] := If[x == 0 && y == 0, 1, x ^ y];
 solvePolynomialCoordinates[coordinates_] := Module[{length, equations, variables},
@@ -759,14 +761,19 @@ walkInt[f_, x_] := Module[{integral, oldintegral, extrainfo, k, leafcounts, rule
 
 End[];
 
-
 (*
   Make it possible to work with subscripted and overscripted variables.
   This needs to stay after the End call or it will fuck up the [esc]qu[esc] function.
 *)
-Notation`AutoLoadNotationPalette = False;
-Needs["Notation`"];
-Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
-Symbolize[ParsedBoxWrapper[OverscriptBox["_","_"]]];
-Notation[ParsedBoxWrapper[\(\(\[LeftBracketingBar] expr_ \[RightBracketingBar]\)\_a_\%b_\)] \[DoubleLongLeftRightArrow]
-   ParsedBoxWrapper[\(intInterval[\(expr_, \({a_, b_}\)\)]\)]]
+
+If[$FrontEnd =!= Null,
+	Notation`AutoLoadNotationPalette = False;
+	Needs["Notation`"];
+];
+
+If[$FrontEnd =!= Null,
+	Symbolize[ParsedBoxWrapper[SubscriptBox["_", "_"]]];
+	Symbolize[ParsedBoxWrapper[OverscriptBox["_","_"]]];
+	Notation[ParsedBoxWrapper[\(\(\[LeftBracketingBar] expr_ \[RightBracketingBar]\)\_a_\%b_\)] \[DoubleLongLeftRightArrow]
+	   ParsedBoxWrapper[\(intInterval[\(expr_, \({a_, b_}\)\)]\)]];
+];
