@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Timestamp: 2015-11-21 18:30 *)
+(* Timestamp: 2015-12-09 15:11 *)
 
 (** User Mathematica initialization file **)
 
@@ -94,7 +94,10 @@ Module[{path, systemPath, userPath},
 
 reloadInitFile[] := Import@ToFileName[{$UserBaseDirectory, "Kernel"}, "init.m"];
 
-fixMathematica[] := DeleteFile @ FileNameJoin[{$UserBaseDirectory, "FrontEnd", "init.m"}];
+fixMathematica[] := Module[{},
+	DeleteDirectory[FileNameJoin[{$UserBaseDirectory, "FrontEnd"}], DeleteContents -> True];
+	Print["Please restart Mathematica"];
+];
 
 preloadPaclets[] := (
 	ChemicalData[All,Preload];
